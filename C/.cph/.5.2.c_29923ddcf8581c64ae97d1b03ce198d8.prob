@@ -1,0 +1,1 @@
+{"name":"Local: 5","url":"c:\\Users\\24096\\Desktop\\code\\C\\5.2.c","tests":[{"id":1677336257433,"input":"15\n23","output":"radius=15.000000, height=23.000000, Area of surface=1999.821747, Volume=5416.500000"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\24096\\Desktop\\code\\C\\5.2.c","group":"local","local":true}

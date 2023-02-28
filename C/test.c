@@ -1,19 +1,11 @@
 #include <stdio.h>
-#include <math.h>
+#define P 3.14
 int main()
 {
-    int a[5],i;
-    int *p=a;
-    for ( i = 0; i < 5; i++)
-    {
-        scanf("%d",&a[i]);
-    }
-    for ( i = 0; i < 5; i++)
-    {
-        printf("%d",a[i]);
-    }
-    printf("\n");
-    printf("%d\n",*++p);
-    printf("%d\n",*p);
+    int r,v;
+    printf("Please input r\n");
+    scanf("%d",&r);
+    v=4.0/3.0*r*r*r*P;
+    printf("V=%d",v);
     return 0;
 }
