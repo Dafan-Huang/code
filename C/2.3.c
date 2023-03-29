@@ -1,10 +1,11 @@
 #include<stdio.h>
 int main()
 {
-    int addresscode;
-    int year,month,day;
-    int seqno;
-    char checkcode;
+
+    int addresscode;//地址码
+    int year,month,day;//出生日期
+    int seqno;//顺序码
+    char checkcode;//校验码
     printf("请输入身份证号码:");
     scanf("%6d%4d%2d%2d%3d%1c",&addresscode,&year,&month,&day,&seqno,&checkcode);
     printf("地址码:%d\n",addresscode);
