@@ -1,2 +1,4 @@
-a=input()
-print(a)
+a=3
+b=2
+c=a%b
+print(c)
