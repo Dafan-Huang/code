@@ -1,4 +1,2 @@
-l=["我是1","我是2","我是3","我是4","我是5","我是6","我是7","我是8","我是9","我是10"]
-# for i in l:
-#     print(i)
-#     time.sleep(1)
+
+print('char = %d,space = %d,digit = %d,others = %d' % (letters,space,digit,others))
