@@ -1,4 +1,4 @@
-a=3
-b=2
-c=a%b
-print(c)
+# 创建随机矩阵
+import numpy as np
+x=np.random.rand(10,1)'
+print(x)
