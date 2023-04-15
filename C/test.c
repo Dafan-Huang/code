@@ -1,19 +1,69 @@
-//统计字符串中a的数量
+//统计一行字符中字母，数字，空格和其他字符的个数
 #include <stdio.h>
-#include <string.h>
+
 int main()
 {
-	char str[100];
-	int i, count = 0;
-	printf("Please input a string:");
-	gets(str);//gets()函数用于从标准输入(stdin)读取一行，并把它存储在str所指向的字符串内，直到一个终止符或EOF(End Of File)。
-	for (i = 0; i < strlen(str); i++)
+	//char line[150];
+	int line[150];
+	int i, alphabets, digits, spaces, others;
+
+	alphabets = digits = spaces = others = 0;
+
+	printf("Enter a line of string: ");
+
+	line[0]=getchar();
+	if (line[0]>=48 && line[0]<=57)
 	{
-		if (str[i] == 'a')//strlen()函数用于计算字符串的长度，不包括字符串的结束符。
-		{
-			count++;
-		}
+		digits++;
 	}
-	printf("a num is :%d", count);//printf()函数用于格式化输出
+	printf("Digits: %d\n", digits);
+	
+	// for ( i = 0; i < 150; i++)
+	// {
+	// 	if ((line[i] >= 'a' && line[i] <= 'z') || (line[i] >= 'A' && line[i] <= 'Z'))
+	// 	{
+	// 		alphabets++;
+	// 	}
+	// 	else if (line[i] >= '0' && line[i] <= '9')
+	// 	{
+	// 		digits++;
+	// 	}
+	// 	else if (line[i] == ' ')
+	// 	{
+	// 		spaces++;
+	// 	}
+	// 	else
+	// 	{
+	// 		others++;
+	// 	}
+	// }
+	
+
+	// gets(line);
+
+	// for(i=0; line[i]!='\0'; ++i)
+	// {
+	// 	if((line[i]>='a' && line[i]<='z') || (line[i]>='A' && line[i]<='Z'))
+	// 	{
+	// 		++alphabets;
+	// 	}
+	// 	else if(line[i]>='0' && line[i]<='9')
+	// 	{
+	// 		++digits;
+	// 	}
+	// 	else if(line[i]==' ')
+	// 	{
+	// 		++spaces;
+	// 	}
+	// 	else
+	// 	{
+	// 		++others;
+	// 	}
+	// }
+
+	printf("Alphabets: %d\n", alphabets);
+	printf("Digits: %d\n", digits);
+	printf("White spaces: %d\n", spaces);
+	printf("Other characters: %d\n", others);
 	return 0;
 }
