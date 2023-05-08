@@ -39,7 +39,7 @@ void output_file(int a[],int n)//输出到文件
 {
 	int i;
 	FILE *fp;
-	if((fp=fopen("test.txt","w"))==NULL)
+	if((fp=fopen("./test.txt","w"))==NULL)
 	{
 		printf("error\n");
 		exit(0);
@@ -83,5 +83,11 @@ int main()
 	bubble_sort(a, N);
 	output(a,N);
 	output_file(a,N);
+	return 0;
+}
+
+void hello()
+{
+	printf("hello world\n");
 	return 0;
 }
