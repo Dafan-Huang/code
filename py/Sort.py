@@ -70,3 +70,27 @@ def Merge_Sort(list,start,end):
 
 Merge_Sort(a,0,len(a)-1)
 print(a)
+
+## 5.快速排序
+# def Quick_Sort(list,start,end):
+#     if start>=end:
+#         return
+#     mid=list[start]
+#     low=start
+#     high=end
+#     while low<high:
+#         while low<high and list[high]>=mid:
+#             high-=1
+#         list[low]=list[high]
+#         while low<high and list[low]<mid:
+#             low+=1
+#         list[high]=list[low]
+#     list[low]=mid
+#     Quick_Sort(list,start,low-1)
+#     Quick_Sort(list,low+1,end)
+
+# Quick_Sort(a,0,len(a)-1)
+# print(a)
+
+# # 6.堆排序
+# def Heap_Sort(list):
