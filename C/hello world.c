@@ -1,11 +1,11 @@
-#include<stdio.h>
+//输出hello world
+#include <stdio.h>
 int main()
 {
-    printf("hello world");
+    printf("hello world\n");
     return 0;
-    // This is a comment
-    //vscode is a good editor
-    //I am a programmer
-    //this is a new line
-    //bye bye
 }
+
+
+// 2023.5.31
+// Path: C\hello world.c
