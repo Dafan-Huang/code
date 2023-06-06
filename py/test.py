@@ -1,36 +1,40 @@
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
- 
-if __name__ == '__main__':
-    import time
-    import random
-    
-    play_it = raw_input('do you want to play it.(\'y\' or \'n\')')
-    while play_it == 'y':
-        c = raw_input('input a character:\n')
-        i = random.randint(0,2**32) % 100
-        print ('please input number you guess:\n')
-        start = time.clock()
-        a = time.time()
-        guess = int(raw_input('input your guess:\n'))
-        while guess != i:
-            if guess > i:
-                print('please input a little smaller')
-                guess = int(raw_input('input your guess:\n'))
-            else:
-                print ('please input a little bigger')
-                guess = int(raw_input('input your guess:\n'))
-        end = time.clock()
-        b = time.time()
-        var = (end - start) / 18.2
-        print (var)
-        # print 'It took you %6.3 seconds' % time.difftime(b,a))
-        if var < 15:
-            print ('you are very clever!')
-        elif var < 25:
-            print ('you are normal!')
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Twist
+
+class RobotController(Node):
+    def __init__(self):
+        super().__init__('robot_controller')
+        self.pub = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.timer = self.create_timer(1.0, self.callback)
+        self.count = 0
+
+    def callback(self):
+        cmd_msg = Twist()
+
+        if self.count == 0 or self.count == 2:
+            # 直行3秒
+            cmd_msg.linear.x = 0.2
         else:
-            print ('you are stupid!')
-        print ('Congradulations')
-        print ('The number you guess is %d' % i)
-        play_it = raw_input('do you want to play it.')
+            # 左转2秒
+            cmd_msg.angular.z = 0.2
+
+        self.pub.publish(cmd_msg)
+
+        self.count += 1
+        if self.count > 3:
+            self.count = 0
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    robot_controller = RobotController()
+
+    rclpy.spin(robot_controller)
+
+    robot_controller.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
