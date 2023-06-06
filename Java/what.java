@@ -1,10 +1,9 @@
-//这是一段注释
-//今天是高考前的最后一天
-//我要好好复习
-//我要好好复习
-//我要好好复习
+//random 1~6 rolling
+import java.util.Random;
 public class what {
     public static void main(String[] args) {
-        System.out.println("我要好好复习，备战期末考试!");
+        Random random = new Random();
+        int num = random.nextInt(6)+1;
+        System.out.println(num);
     }
 }
