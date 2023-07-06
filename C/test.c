@@ -1,31 +1,26 @@
-#include <opencv2/opencv.hpp>
-#include <iostream>
+//office
+#include <stdio.h>
+#include <stdlib.h>
 
-using namespace cv;
-using namespace std;
-
-int main()
-{
-    Mat src = imread("triangle.jpg");
-    Mat gray, edges;
-    cvtColor(src, gray, COLOR_BGR2GRAY);
-    Canny(gray, edges, 50, 200, 3);
-    vector<vector<Point>> contours;
-    findContours(edges, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-    for (size_t i = 0; i < contours.size(); i++)
-    {
-        vector<Point> approx;
-        approxPolyDP(contours[i], approx, arcLength(contours[i], true) * 0.02, true);
-        if (approx.size() == 3)
-        {
-            double score = matchShapes(contours[i], approx, CONTOURS_MATCH_I1, 0);
-            if (score < 0.1)
-            {
-                drawContours(src, contours, static_cast<int>(i), Scalar(0, 0, 255), 2);
-            }
+int main(){
+    //输出菱形
+    int i,j,k;
+    for(i=1;i<=4;i++){
+        for(j=1;j<=4-i;j++){
+            printf(" ");
         }
+        for(k=1;k<=2*i-1;k++){
+            printf("*");
+        }
+        printf("\n");
     }
-    imshow("result", src);
-    waitKey(0);
-    return 0;
+    for(i=1;i<=3;i++){
+        for(j=1;j<=i;j++){
+            printf(" ");
+        }
+        for(k=1;k<=7-2*i;k++){
+            printf("*");
+        }
+        printf("\n");
+    }
 }
