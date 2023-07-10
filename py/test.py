@@ -1,40 +1,19 @@
-import rclpy
-from rclpy.node import Node
-from geometry_msgs.msg import Twist
+import cv2 as cv
+import numpy as np
 
-class RobotController(Node):
-    def __init__(self):
-        super().__init__('robot_controller')
-        self.pub = self.create_publisher(Twist, 'cmd_vel', 10)
-        self.timer = self.create_timer(1.0, self.callback)
-        self.count = 0
+img = cv.imread('triangle.png')
+gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-    def callback(self):
-        cmd_msg = Twist()
+edges = cv.Canny(gray, 50, 200)
+contours, hierarchy = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-        if self.count == 0 or self.count == 2:
-            # 直行3秒
-            cmd_msg.linear.x = 0.2
-        else:
-            # 左转2秒
-            cmd_msg.angular.z = 0.2
+for cnt in contours:
+    approx = cv.approxPolyDP(cnt, 0.01*cv.arcLength(cnt, True), True)
+    if len(approx) == 3:
+        score = cv.matchShapes(cnt, approx, cv.CONTOURS_MATCH_I1, 0)
+        if score < 0.1:
+            cv.drawContours(img, [cnt], 0, (0, 0, 255), 2)
 
-        self.pub.publish(cmd_msg)
-
-        self.count += 1
-        if self.count > 3:
-            self.count = 0
-
-def main(args=None):
-    rclpy.init(args=args)
-
-    robot_controller = RobotController()
-
-    rclpy.spin(robot_controller)
-
-    robot_controller.destroy_node()
-    rclpy.shutdown()
-
-
-if __name__ == '__main__':
-    main()
+cv.imshow('result', img)
+cv.waitKey(0)
+cv.destroyAllWindows()
