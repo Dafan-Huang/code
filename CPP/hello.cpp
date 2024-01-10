@@ -1,7 +1,14 @@
 #include <iostream>
 using namespace std;
 
+/**
+ * @brief 打印Hello World
+ */
 void printHelloWorld();
+
+/**
+ * @brief 绘制爱心
+ */
 void drawLove();
 
 int main()
@@ -10,10 +17,8 @@ int main()
     drawLove();
     return 0;
 }
-//打印hello world
+
 void printHelloWorld()
 {
     cout << "Hello World!" << endl;
 }
-
-
