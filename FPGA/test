@@ -1,0 +1,16 @@
+FPGA
+field programmable gate array
+
+ex1
+module freq //
+(
+    input wire clk,
+    input wire rst,
+
+    output 
+    output 
+);
+
+
+
+endmodule
