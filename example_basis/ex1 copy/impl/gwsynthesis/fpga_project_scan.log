@@ -1,0 +1,20 @@
+GowinSynthesis start
+Running parser ...
+Analyzing Verilog file 'C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v'
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":29)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":30)
+ERROR (EX3872) : 'press' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":33)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":38)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":39)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":47)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":48)
+ERROR (EX3872) : 'press' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":51)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":61)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":62)
+ERROR (EX3872) : 'press' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":65)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":77)
+ERROR (EX3872) : 'rst_n' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":78)
+ERROR (EX3872) : 'press' is not declared("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":81)
+ERROR (EX3928) : Module 'test' is ignored due to previous errors("C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v":172)
+Verilog file 'C:\Users\24096\Desktop\example_basis\ex1 copy\src\test.v' ignored due to errors
+GowinSynthesis finish

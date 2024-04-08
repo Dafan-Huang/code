@@ -1,0 +1,11 @@
+-d E:\haoxy\doc\fpga\yitices_pro\fpga\ex5\impl\gwsynthesis\project_1.vg
+-p GW1NSR-4C-QFN48P-6
+-pn GW1NSR-LV4CQN48PC6/I5
+-cst E:\haoxy\doc\fpga\yitices_pro\fpga\ex5\src\project_1.cst
+-cfg E:\haoxy\doc\fpga\yitices_pro\fpga\ex5\impl\pnr\device.cfg
+-bit
+-tr
+-ph
+-timing
+-cst_error
+-route_maxfan 23
