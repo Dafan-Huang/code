@@ -153,3 +153,113 @@ initial begin
 end
       
 endmodule
+
+
+module c_74LS161(
+    input CP,
+    input CR,
+    input LD,
+    input EP,
+    input ET,
+    input [3:0] D,
+    output reg [3:0] Q,
+    output reg CO
+);
+
+always @(posedge CP or negedge CR) begin
+    if(~CR) begin 
+        Q <= 4'b0000;
+        CO <= 1'b0;
+    end
+    else if(~LD) begin 
+        Q <= D;
+        CO <= 1'b0;
+    end
+    else begin 
+        case({EP, ET})
+            2'bx0: begin Q <= Q; CO <= 1'b0; end
+            2'b01: begin Q <= Q; CO <= CO; end
+            2'b11: begin 
+                Q <= Q + 1'b1; 
+                CO <= (Q == 4'b1111); 
+            end
+        endcase
+    end
+end
+
+endmodule
+
+
+
+module c_74LS161_tb;
+
+	// Inputs
+	reg CP;
+	reg CR;
+	reg LD;
+	reg EP;
+	reg ET;
+	reg [3:0] D;
+
+	// Outputs
+	wire [3:0] Q;
+	wire CO;
+
+	// Instantiate the Unit Under Test (UUT)
+	c_74LS161 uut (
+		.CP(CP), 
+		.CR(CR), 
+		.LD(LD), 
+		.EP(EP), 
+		.ET(ET), 
+		.D(D), 
+		.Q(Q), 
+		.CO(CO)
+	);
+
+	initial 
+		CP = 1;
+	always
+		#5 CP = ~CP;
+
+	initial begin
+		
+		//同步并入
+		CR = 1;
+		LD = 0;
+		D = 4'b1010;
+		//EP = x;ET = x;
+		#100;
+		
+		//异步清零
+		CR = 0;
+		EP = 0;
+		ET = 0;
+		D = 4'b0000;
+		#100;
+		
+		//计数
+		CR = 1;
+		LD = 1;
+		EP = 1;ET = 1;
+		#150;
+		
+		//保持CO=Q3Q2Q1Q0
+		CR = 1;
+		LD = 1;
+		EP = 0;
+		ET = 1;
+		#100;
+		
+		//保持CO=0
+		CR = 1;
+		LD = 1;
+		//EP = x;
+		ET = 1;
+		#100;
+		
+						
+	end
+      
+endmodule
+
