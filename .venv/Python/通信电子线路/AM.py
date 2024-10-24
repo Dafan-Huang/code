@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 carrier_freq = 10e3  # Carrier frequency in Hz (10 kHz) (载波频率)
 modulation_freq = 1e3  # Modulation frequency in Hz (1 kHz) (调制频率)
 amplitude = 1  # Amplitude in Volts (1 V) (幅度)
-modulation_index = 0.3  # Modulation index (100%) (调制指数)
+modulation_index = 0.3  # Modulation index (x%) (调制指数)
 sampling_rate = 1e6  # Sampling rate in Hz (1 MHz) (采样率)
-duration = 0.2 * 1e-2  # Duration in seconds (持续时间 0.2s)
+duration = 0.275 * 1e-2  # Duration in seconds (持续时间 0.2s)
 
 # Time array
 t = np.arange(0, duration, 1/sampling_rate)
