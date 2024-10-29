@@ -25,7 +25,7 @@ wire		square_pose,square_nege;
 wire		gate_start,gate_end;
 
 //使方波和100MHz时钟同步并捕捉待测方波的边沿
-always @ (posedge clk_100M)
+always @ (posedge clk_100M)  //√
 begin
 	square_r0 <= square;
 	square_r1 <= square_r0;//将外部输入的方波打两拍
@@ -33,10 +33,10 @@ begin
 	square_r3 <= square_r2;
 end
 
-assign square_pose = square_r2 & ~square_r3;
-assign square_nege = ~square_r2 & square_r3;	
+assign square_pose = square_r2 & ~square_r3;  //捕捉方波的上升沿
+assign square_nege = ~square_r2 & square_r3;  //捕捉方波的下降沿	
 
-always @ (posedge clk_100M)
+always @ (posedge clk_100M)  //√
 begin
 	if(cnt1 == GATE_TIME)begin
 		cnt1 <= 28'd0;
@@ -47,9 +47,9 @@ begin
 		end
 end
 
-always @ (posedge clk_100M )
+always @ (posedge clk_100M )  //√
 begin
-	if(square_pose == 1'b1)begin 
+	if(square_pose == 1'b1)begin //上升沿时，开始同步
 		gatebuf <= gate;//使闸门信号与待测方波同步，保证一个闸门包含整数个方波周期
 		end
 	
@@ -60,7 +60,7 @@ assign	gate_start = gatebuf & ~gatebuf1;//表示闸门开始时刻
 assign	gate_end = ~gatebuf & gatebuf1;//闸门结束时刻
 
 //计数系统时钟周期
-always @ (posedge clk_100M)
+always @ (posedge clk_100M)  //√
 begin
 	if(gate_start == 1'b1)begin
 		cnt2 <= 28'd1;
@@ -74,7 +74,7 @@ begin
 end
 
 //计数待测方波周期数
-always @ (posedge clk_100M )
+always @ (posedge clk_100M ) //√
 begin
 	if(gate_start == 1'b1)begin 
 		cnt3 <= 28'd0;
@@ -88,7 +88,7 @@ begin
 		end
 end
 
-assign CNTCLK = cnt2_r;
-assign CNTSQU = cnt3_r;
+assign CNTCLK = cnt2_r; //将计数结果输出
+assign CNTSQU = cnt3_r; //将计数结果输出
 
 endmodule
