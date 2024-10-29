@@ -1,8 +1,9 @@
 module meas_freq(
-	input			clk_100M,	//100MHz系统时钟
+	input			clk_100M,	        //100MHz系统时钟
 	input			square,		
 	output	wire	[27:0]	CNTCLK,		//闸门内系统时钟周期计数
 	output	wire	[27:0]	CNTSQU		//闸门内待测方波时钟周期计数
+	//output	wire	freq_s		        //频率输出
 );
 parameter   GATE_TIME = 28'd999_999;//实际闸门计数是99_999_999，仿真时设为10ms
 
