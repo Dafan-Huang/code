@@ -1,5 +1,5 @@
 module div_fsm#(
-    parameter   DATAWIDTH = 10'd8
+    parameter   DATAWIDTH = 10'd8                   // 数据宽度
 )
 (
     input                         clk,              // 时钟信号
