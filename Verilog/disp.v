@@ -1,17 +1,17 @@
 module disp(
-    Clk,
-    Reset_n,
-    Disp_Data,
-    SEL,
-    SEG
+    Clk,                // 时钟信号
+    Reset_n,            // 复位信号
+    Disp_Data,          // 显示数据
+    SEL,                // 数码管选择信号
+    SEG                 // 数码管段选信号
 );
     input Clk;
     input Reset_n;
-    input [7:0] Disp_Data; // 8 bits for 2 digits
+    input [7:0] Disp_Data; // 8 bits for 2 digits  
     output reg [1:0] SEL;   // Only 2 digits
     output reg [7:0] SEG;
     
-    parameter MCNT_1MS = 1000000 /20 - 1;
+    parameter MCNT_1MS = 1000000 /20 - 1;      // 1ms
     parameter MCNT_SEL = 2 - 1; // 2 digits
     reg [15:0] cnt_1ms;
     reg [1:0] cnt_sel; // Change to 2-bit counter for 2 digits
@@ -41,7 +41,7 @@ module disp(
         end
     end
 
-    // 2-to-4 Decoder
+    // 2-to-4 Decoder    //24线选通器
     always @(*) begin
         case (cnt_sel)
             2'b00: encode_sel = 2'b01; // Select first digit
@@ -49,22 +49,22 @@ module disp(
         endcase
     end
 
-    always @(posedge Clk or negedge Reset_n) begin
+    always @(posedge Clk or negedge Reset_n) begin  
         if (!Reset_n)
             SEL <= 0;
         else
             SEL <= encode_sel;
     end
 
-    // Segment Selection
+    // Segment Selection   //段选信号
     always @(*) begin
         case (cnt_sel)
-            2'b00: data_temp = Disp_Data[3:0]; // First digit
-            2'b01: data_temp = Disp_Data[7:4]; // Second digit
+            2'b00: data_temp = Disp_Data[3:0]; // First digit   //前四位
+            2'b01: data_temp = Disp_Data[7:4]; // Second digit  //后四位
         endcase
     end
 
-    // Segment Encoding
+    // Segment Encoding   //段译码
     always @(*) begin
         case (data_temp)
             0  : LUT_seg = 8'hc0; // 0
@@ -87,7 +87,7 @@ module disp(
         endcase
     end
 
-    always @(posedge Clk or negedge Reset_n) begin
+    always @(posedge Clk or negedge Reset_n) begin  
         if (!Reset_n)
             SEG <= 0;
         else
@@ -95,3 +95,60 @@ module disp(
     end
 
 endmodule
+
+
+
+// module tb_disp;
+//     reg Clk;
+//     reg Reset_n;
+//     reg [7:0] Disp_Data;
+//     wire [1:0] SEL;
+//     wire [7:0] SEG;
+
+//     // Instantiate the disp module
+//     disp uut (
+//         .Clk(Clk),
+//         .Reset_n(Reset_n),
+//         .Disp_Data(Disp_Data),
+//         .SEL(SEL),
+//         .SEG(SEG)
+//     );
+
+//     // Clock generation
+//     initial begin
+//         Clk = 0;
+//         forever #5 Clk = ~Clk; // 10ns period
+//     end
+
+//     // Test sequence
+//     initial begin
+//         // Initialize inputs
+//         Reset_n = 0;
+//         Disp_Data = 8'h00;
+
+//         // Apply reset
+//         #20;
+//         Reset_n = 1;
+
+//         // Display 0 to F
+//         Disp_Data = 8'h00; #20;
+//         Disp_Data = 8'h11; #20;
+//         Disp_Data = 8'h22; #20;
+//         Disp_Data = 8'h33; #20;
+//         Disp_Data = 8'h44; #20;
+//         Disp_Data = 8'h55; #20;
+//         Disp_Data = 8'h66; #20;
+//         Disp_Data = 8'h77; #20;
+//         Disp_Data = 8'h88; #20;
+//         Disp_Data = 8'h99; #20;
+//         Disp_Data = 8'haa; #20;
+//         Disp_Data = 8'hbb; #20;
+//         Disp_Data = 8'hcc; #20;
+//         Disp_Data = 8'hdd; #20;
+//         Disp_Data = 8'hee; #20;
+//         Disp_Data = 8'hff; #20;
+
+//         // Finish simulation
+//         $stop;
+//     end
+// endmodule
