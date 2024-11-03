@@ -1,5 +1,3 @@
-
-
 module top_cymometer#(
     //parameter define
     // parameter       DIV_N        = 26'd10_000_000   ,   // 分频系数
