@@ -1,8 +1,28 @@
-module meas#(
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    13:40:21 11/04/2024 
+// Design Name: 
+// Module Name:    zhizhang 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module zhizhang(
     input           clk_6M,          // 6MHz系统时钟
     input           square,          // 待测方波信号
-    input           reset_n          // 复位信号   //加个按键消抖
-)(
+    input           reset_n,          // 复位信号   //加个按键消抖
+	 
     output reg [1:0] SEL,            // 数码管选择器
     output reg [7:0] SEG             // 数码管段选信号
 );
@@ -30,9 +50,12 @@ wire gate_start, gate_end;
 wire [27:0] CNTCLK;        // 闸门内系统时钟周期计数
 wire [27:0] CNTSQU;        // 闸门内待测方波时钟周期计数
 
+wire [27:0] freq_x;
+reg [27:0] number;
+
 // 二进制转BCD码模块定义
-wire [7:0] data;           // 8位二进制数的值
-wire [11:0] bcd_data;      // 3位十进制数的8421BCD值
+reg [7:0] data;           // 8位二进制数的值
+reg [11:0] bcd_data;      // 3位十进制数的8421BCD值
 
 parameter CNT_SHIFT_NUM = 7'd8;  // 由data的位宽决定这里是8
 reg [6:0] cnt_shift;             // 移位判断计数器该值由data的位宽决定这里是6
@@ -40,10 +63,10 @@ reg [19:0] data_shift;           // 移位判断数据寄存器，由data和bcdd
 reg shift_flag;                  // 移位判断标志信号
 
 // 数码管显示模块定义
-parameter MCNT_1MS = 28'd6_000_000 / 20 - 1; // 1ms
+parameter MCNT_1MS = 28'd6_000_000 / 10 - 1; // 1ms
 parameter MCNT_SEL = 2 - 1;                  // 位选信号计数器
 
-reg [7:0] Disp_Data;        // 显示数据
+wire [7:0] Disp_Data;        // 显示数据
 reg [27:0] cnt_1ms;
 reg [1:0] cnt_sel;           // Change to 2-bit counter for 2 digits
 reg [1:0] encode_sel;
@@ -54,17 +77,27 @@ reg [3:0] data_temp;
 
 // 使方波和6MHz时钟同步并捕捉待测方波的边沿
 always @(posedge clk_6M or negedge reset_n) begin
-    square_r0 <= square;
-    square_r1 <= square_r0; // 将外部输入的方波打两拍
-    square_r2 <= square_r1;
-    square_r3 <= square_r2;
+    if (!reset_n) begin
+        square_r0 <= 1'b0;
+        square_r1 <= 1'b0;
+        square_r2 <= 1'b0;
+        square_r3 <= 1'b0;
+    end else begin
+        square_r0 <= square;
+        square_r1 <= square_r0;
+        square_r2 <= square_r1;
+        square_r3 <= square_r2;
+    end
 end
 
 assign square_pose = square_r2 & ~square_r3;  // 捕捉方波的上升沿
 assign square_nege = ~square_r2 & square_r3;  // 捕捉方波的下降沿
 
 always @(posedge clk_6M or negedge reset_n) begin
-    if (cnt1 == GATE_TIME) begin
+    if (!reset_n) begin
+        cnt1 <= 28'd0;
+        gate <= 1'b0;
+    end else if (cnt1 == GATE_TIME) begin
         cnt1 <= 28'd0;
         gate <= ~gate; // 产生 1s 的闸门信号
     end else begin
@@ -91,59 +124,77 @@ assign gate_end = ~gatebuf & gatebuf1;   // 闸门结束时刻
 
 // 计数系统时钟周期
 always @(posedge clk_6M or negedge reset_n) begin
-    if (gate_start == 1'b1) begin
-        cnt2 <= 28'd1;
-    end else if (gate_end == 1'b1) begin
-        cnt2_r <= cnt2; // 将所得结果保存在cnt2_r中，并将计数器清零
+    if (!reset_n) begin
         cnt2 <= 28'd0;
-    end else if (gatebuf1 == 1'b1) begin // 在闸门内计数系统时钟周期
-        cnt2 <= cnt2 + 1'b1;
+        cnt2_r <= 28'd0;
+        gatebuf1 <= 1'b0;
+    end else begin
+        if (gate_start == 1'b1) begin
+            cnt2 <= 28'd1;
+        end else if (gate_end == 1'b1) begin
+            cnt2_r <= cnt2; // 将所得结果保存在cnt2_r中，并将计数器清零
+            cnt2 <= 28'd0;
+        end else if (gatebuf1 == 1'b1) begin // 在闸门内计数系统时钟周期
+            cnt2 <= cnt2 + 1'b1;
+        end
+        gatebuf1 <= gatebuf; // Update gatebuf1 synchronously
     end
 end
 
 // 计数待测方波周期数
 always @(posedge clk_6M or negedge reset_n) begin
-    if (gate_start == 1'b1) begin
+    if (!reset_n) begin
         cnt3 <= 28'd0;
-    end else if (gate_end == 1'b1) begin
-        cnt3_r <= cnt3; // 将所得结果保存在cnt3_r中，并将计数器清零
-        cnt3 <= 28'd0;
-    end else if (gatebuf1 == 1'b1 && square_nege == 1'b1) begin // 在闸门内计数待测方波周期数(数闸门内方波的下降沿）
-        cnt3 <= cnt3 + 1'b1;
+        cnt3_r <= 28'd0;
+    end else begin
+        if (gate_start == 1'b1) begin
+            cnt3 <= 28'd0;
+        end else if (gate_end == 1'b1) begin
+            cnt3_r <= cnt3; // 将所得结果保存在cnt3_r中，并将计数器清零
+            cnt3 <= 28'd0;
+        end else if (gatebuf1 == 1'b1 && square_nege == 1'b1) begin // 在闸门内计数待测方波周期数(数闸门内方波的下降沿）
+            cnt3 <= cnt3 + 1'b1;
+        end
     end
 end
 
 assign CNTCLK = cnt2_r; // 将计数结果输出
 assign CNTSQU = cnt3_r; // 将计数结果输出
 
-assign freq_x = (CNTCLK / CNTSQU)*6_000_000; // 计算频率值
+//assign freq_x = (CNTCLK / CNTSQU)*6_000_000; // 计算频率值
 //待修改
+
+assign freq_x = CNTSQU; 
 
 //// 纸张数目判断模块 ////
 always @(posedge clk_6M or negedge reset_n) begin
     if (!reset_n)
         number <= 8'd0;
     else
-        if(freq_x < 1000)
+        if(freq_x < 50_000)
             number <= 8'd0;
-        else if(freq_x < 2000 && freq_x >= 1000)
+        else if(freq_x >= 65_000 && freq_x < 75_000)
             number <= 8'd1;
-        else if(freq_x < 3000 && freq_x >= 2000)
+        else if(freq_x >= 90_000 && freq_x < 100_000)
             number <= 8'd2;
-        else if(freq_x < 4000 && freq_x >= 3000)
+        else if(freq_x >= 110_000 && freq_x < 120_000)
             number <= 8'd3;
-        else if(freq_x < 5000 && freq_x >= 4000)
+        else if(freq_x >= 130_000 && freq_x < 140_000)
             number <= 8'd4;
-        else if(freq_x < 6000 && freq_x >= 5000)
+        else if(freq_x >= 145_000 && freq_x < 159_000)
             number <= 8'd5;
-        else if(freq_x < 7000 && freq_x >= 6000)
+        else if(freq_x >= 170_000 && freq_x < 180_000)
             number <= 8'd6;
-        else if(freq_x < 8000 && freq_x >= 7000)
+        else if(freq_x >= 185_000 && freq_x < 195_000)
             number <= 8'd7;
-        else if(freq_x < 9000 && freq_x >= 8000)
+        else if(freq_x >= 200_000 && freq_x < 210_000)
             number <= 8'd8;
-        else if(freq_x >= 9000)
+        else if(freq_x >= 215_000 && freq_x < 225_000)
             number <= 8'd9;
+        else if(freq_x >= 226_000 && freq_x < 240_000)
+            number <= 8'd10;
+		else
+            number <= 8'd0;
 end
 
 //// 二进制转BCD码模块 ////
@@ -204,7 +255,7 @@ always @(posedge clk_6M or negedge reset_n) begin
         bcd_data <= bcd_data;
 end
 
-assign Disp_data = bcd_data[7:0];
+assign Disp_Data = bcd_data[7:0];
 
 //// 显示模块 ////
 
@@ -256,16 +307,16 @@ end
 // Segment Encoding
 always @(*) begin
     case (data_temp)
-        0  : LUT_seg = 8'hc0; // 0
-        1  : LUT_seg = 8'hf9; // 1
-        2  : LUT_seg = 8'ha4; // 2
-        3  : LUT_seg = 8'hb0; // 3
-        4  : LUT_seg = 8'h99; // 4
-        5  : LUT_seg = 8'h92; // 5
-        6  : LUT_seg = 8'h82; // 6
-        7  : LUT_seg = 8'hf8; // 7
-        8  : LUT_seg = 8'h80; // 8
-        9  : LUT_seg = 8'h90; // 9
+        0  : LUT_seg = 8'h3f; // 0
+        1  : LUT_seg = 8'h06; // 1
+        2  : LUT_seg = 8'h5b; // 2
+        3  : LUT_seg = 8'h4f; // 3
+        4  : LUT_seg = 8'h66; // 4
+        5  : LUT_seg = 8'h6d; // 5
+        6  : LUT_seg = 8'h7d; // 6
+        7  : LUT_seg = 8'h07; // 7
+        8  : LUT_seg = 8'h7f; // 8
+        9  : LUT_seg = 8'h6f; // 9
         default: LUT_seg = 8'hff; // Off
     endcase
 end
