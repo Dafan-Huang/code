@@ -30,7 +30,7 @@ module zhizhang(
 // 频率计模块定义
 parameter GATE_TIME = 28'd6_000_000 - 1; // 闸门时间为1s
 
-reg square_r0 = 1'b0;
+reg square_r0 = 1'b0;      // 方波信号的寄存器
 reg square_r1 = 1'b0;
 reg square_r2 = 1'b0;
 reg square_r3 = 1'b0;
@@ -40,7 +40,7 @@ reg gate = 1'b0;           // 闸门信号
 reg gatebuf = 1'b0;        // 与方波同步之后的闸门信号
 reg gatebuf1 = 1'b0;       // 同步闸门信号延时一拍
 
-reg [27:0] cnt2 = 28'd0;
+reg [27:0] cnt2 = 28'd0;    // 计数系统时钟周期
 reg [27:0] cnt2_r = 28'd0;
 reg [27:0] cnt3 = 28'd0;
 reg [27:0] cnt3_r = 28'd0;
@@ -50,8 +50,8 @@ wire gate_start, gate_end;
 wire [27:0] CNTCLK;        // 闸门内系统时钟周期计数
 wire [27:0] CNTSQU;        // 闸门内待测方波时钟周期计数
 
-wire [27:0] freq_x;
-reg [27:0] number;
+wire [27:0] freq_x;        // 频率计数结果
+reg [27:0] number;         // 纸张数目
 
 // 二进制转BCD码模块定义
 reg [7:0] data;           // 8位二进制数的值
@@ -67,11 +67,11 @@ parameter MCNT_1MS = 28'd6_000_000 / 10 - 1; // 1ms
 parameter MCNT_SEL = 2 - 1;                  // 位选信号计数器
 
 wire [7:0] Disp_Data;        // 显示数据
-reg [27:0] cnt_1ms;
-reg [1:0] cnt_sel;           // Change to 2-bit counter for 2 digits
-reg [1:0] encode_sel;
-reg [7:0] LUT_seg;
-reg [3:0] data_temp;
+reg [27:0] cnt_1ms;          // 1ms计数器
+reg [1:0] cnt_sel;           // 位选信号计数器
+reg [1:0] encode_sel;        // 2-to-4编码器输出
+reg [7:0] LUT_seg;           // 数码管段选信号
+reg [3:0] data_temp;         // 临时存储数据   
 
 //// 频率计模块 ////
 
@@ -137,7 +137,7 @@ always @(posedge clk_6M or negedge reset_n) begin
         end else if (gatebuf1 == 1'b1) begin // 在闸门内计数系统时钟周期
             cnt2 <= cnt2 + 1'b1;
         end
-        gatebuf1 <= gatebuf; // Update gatebuf1 synchronously
+        gatebuf1 <= gatebuf; //同步更新gatebuf1
     end
 end
 
@@ -161,9 +161,6 @@ end
 assign CNTCLK = cnt2_r; // 将计数结果输出
 assign CNTSQU = cnt3_r; // 将计数结果输出
 
-//assign freq_x = (CNTCLK / CNTSQU)*6_000_000; // 计算频率值
-//待修改
-
 assign freq_x = CNTSQU; 
 
 //// 纸张数目判断模块 ////
@@ -173,27 +170,67 @@ always @(posedge clk_6M or negedge reset_n) begin
     else
         if(freq_x < 50_000)
             number <= 8'd0;
-        else if(freq_x >= 65_000 && freq_x < 75_000)
+        else if(freq_x >= 68_000 && freq_x < 98_000)
             number <= 8'd1;
-        else if(freq_x >= 90_000 && freq_x < 100_000)
+        else if(freq_x >= 97_000 && freq_x < 17_000)
             number <= 8'd2;
-        else if(freq_x >= 110_000 && freq_x < 120_000)
+        else if(freq_x >= 121_000 && freq_x < 131_000)
             number <= 8'd3;
-        else if(freq_x >= 130_000 && freq_x < 140_000)
+        else if(freq_x >= 145_000 && freq_x < 155_000)
             number <= 8'd4;
-        else if(freq_x >= 145_000 && freq_x < 159_000)
+        else if(freq_x >= 173_000 && freq_x < 183_000)
             number <= 8'd5;
-        else if(freq_x >= 170_000 && freq_x < 180_000)
+        else if(freq_x >= 192_000 && freq_x < 202_000)
             number <= 8'd6;
-        else if(freq_x >= 185_000 && freq_x < 195_000)
+        else if(freq_x >= 207_000 && freq_x < 216_000)
             number <= 8'd7;
-        else if(freq_x >= 200_000 && freq_x < 210_000)
+        else if(freq_x >= 216_000 && freq_x < 226_000)
             number <= 8'd8;
-        else if(freq_x >= 215_000 && freq_x < 225_000)
+        else if(freq_x >= 231_000 && freq_x < 241_000)
             number <= 8'd9;
-        else if(freq_x >= 226_000 && freq_x < 240_000)
+        else if(freq_x >= 246_000 && freq_x < 256_000)
             number <= 8'd10;
-		else
+        else if(freq_x >= 260_000 && freq_x < 270_000)
+            number <= 8'd11;
+        else if(freq_x >= 274_000 && freq_x < 284_000)
+            number <= 8'd12;
+        else if(freq_x >= 289_000 && freq_x < 299_000)
+            number <= 8'd13;
+        else if(freq_x >= 302_000 && freq_x < 312_000)
+            number <= 8'd14;
+        else if(freq_x >= 313_000 && freq_x < 323_000)
+            number <= 8'd15;
+        else if(freq_x >= 324_000 && freq_x < 334_000)
+            number <= 8'd16;
+        else if(freq_x >= 336_500 && freq_x < 341_500)
+            number <= 8'd17;
+        else if(freq_x >= 346_500 && freq_x < 351_500)
+            number <= 8'd18;
+        else if(freq_x >= 355_500 && freq_x < 360_500)
+            number <= 8'd19;
+        else if(freq_x >= 363_500 && freq_x < 368_500)
+            number <= 8'd20;
+        else if(freq_x >= 370_500 && freq_x < 375_500)
+            number <= 8'd21;
+        else if(freq_x >= 377_500 && freq_x < 382_500)
+            number <= 8'd22;
+        else if(freq_x >= 384_500 && freq_x < 389_500)
+            number <= 8'd23;
+        else if(freq_x >= 390_500 && freq_x < 395_500)
+            number <= 8'd24;
+        else if(freq_x >= 396_500 && freq_x < 401_500)
+            number <= 8'd25;
+        else if(freq_x >= 401_500 && freq_x < 406_500)
+            number <= 8'd26;
+        else if(freq_x >= 407_500 && freq_x < 412_500)
+            number <= 8'd27;
+        else if(freq_x >= 414_500 && freq_x < 419_500)
+            number <= 8'd28;
+        else if(freq_x >= 419_500 && freq_x < 424_500)
+            number <= 8'd29;
+        else if(freq_x >= 424_500 && freq_x < 440_000)
+            number <= 8'd30;
+        else 
             number <= 8'd0;
 end
 
@@ -299,8 +336,8 @@ end
 // Segment Selection
 always @(*) begin
     case (cnt_sel)
-        2'b00: data_temp = Disp_Data[3:0]; // First digit   //个位
-        2'b01: data_temp = Disp_Data[7:4]; // Second digit  //十位
+        2'b00: data_temp = Disp_Data[3:0]; //个位
+        2'b01: data_temp = Disp_Data[7:4]; //十位
     endcase
 end
 
