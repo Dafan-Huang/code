@@ -67,22 +67,22 @@ module disp(
     // Segment Encoding   //段译码
     always @(*) begin
         case (data_temp)
-            0  : LUT_seg = 8'hc0; // 0
-            1  : LUT_seg = 8'hf9; // 1
-            2  : LUT_seg = 8'ha4; // 2
-            3  : LUT_seg = 8'hb0; // 3
-            4  : LUT_seg = 8'h99; // 4
-            5  : LUT_seg = 8'h92; // 5
-            6  : LUT_seg = 8'h82; // 6
-            7  : LUT_seg = 8'hf8; // 7
-            8  : LUT_seg = 8'h80; // 8
-            9  : LUT_seg = 8'h90; // 9
-            4'ha: LUT_seg = 8'h88; // A
-            4'hb: LUT_seg = 8'h83; // b
-            4'hc: LUT_seg = 8'hc6; // C
-            4'hd: LUT_seg = 8'ha1; // d
-            4'he: LUT_seg = 8'h86; // E
-            4'hf: LUT_seg = 8'h8e; // F
+            0  : LUT_seg = 8'h3f; // 0
+            1  : LUT_seg = 8'h06; // 1
+            2  : LUT_seg = 8'h5b; // 2
+            3  : LUT_seg = 8'h4f; // 3
+            4  : LUT_seg = 8'h66; // 4
+            5  : LUT_seg = 8'h6d; // 5
+            6  : LUT_seg = 8'h7d; // 6
+            7  : LUT_seg = 8'h07; // 7
+            8  : LUT_seg = 8'h7f; // 8
+            9  : LUT_seg = 8'h6f; // 9
+            4'ha: LUT_seg = 8'h77; // A
+            4'hb: LUT_seg = 8'h7c; // b
+            4'hc: LUT_seg = 8'h39; // C
+            4'hd: LUT_seg = 8'h5e; // d
+            4'he: LUT_seg = 8'h79; // E
+            4'hf: LUT_seg = 8'h71; // F
             default: LUT_seg = 8'hff; // Off
         endcase
     end

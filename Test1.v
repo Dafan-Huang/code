@@ -366,3 +366,53 @@ always @(posedge clk_6M or negedge reset_n) begin
 end
 
 endmodule
+
+
+// Testbench
+// `timescale 1ns / 1ps
+
+// module zhizhang_tb;
+
+//     // Inputs
+//     reg clk_6M;
+//     reg square;
+//     reg reset_n;
+
+//     // Outputs
+//     wire [1:0] SEL;
+//     wire [7:0] SEG;
+
+//     // Instantiate the Unit Under Test (UUT)
+//     zhizhang uut (
+//         .clk_6M(clk_6M), 
+//         .square(square), 
+//         .reset_n(reset_n), 
+//         .SEL(SEL), 
+//         .SEG(SEG)
+//     );
+
+//     initial begin
+//         // Initialize Inputs
+//         clk_6M = 0;
+//         square = 0;
+//         reset_n = 0;
+
+//         // Wait 100 ns for global reset to finish
+//         #100;
+//         reset_n = 1;
+
+//         // Add stimulus here
+//         #200 square = 1;
+//         #200 square = 0;
+//         #200 square = 1;
+//         #200 square = 0;
+//         #200 square = 1;
+//         #200 square = 0;
+//     end
+
+//     // Clock generation
+//     always #83.333 clk_6M = ~clk_6M; // 6MHz clock
+    
+//     //square wave generation
+//     always #2320 square = ~square;
+// endmodule

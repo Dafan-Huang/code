@@ -63,3 +63,47 @@ always@(posedge sys_clk or negedge sys_rst_n)begin
 end
 
 endmodule
+module tb_binary2bcd;
+
+// Testbench signals
+reg sys_clk;
+reg sys_rst_n;
+reg [7:0] data;
+wire [11:0] bcd_data;
+
+// Instantiate the DUT (Device Under Test)
+binary2bcd uut (
+    .sys_clk(sys_clk),
+    .sys_rst_n(sys_rst_n),
+    .data(data),
+    .bcd_data(bcd_data)
+);
+
+// Clock generation
+initial begin
+    sys_clk = 0;
+    forever #5 sys_clk = ~sys_clk; // 10ns period clock
+end
+
+// Test sequence
+initial begin
+    // Initialize signals
+    sys_rst_n = 0;
+    data = 8'd0;
+    #20;
+    
+    // Release reset
+    sys_rst_n = 1;
+    #20;
+    
+    // Test data from 0 to 10
+    for (data = 0; data <= 10; data = data + 1) begin
+        #20; // Wait for some time to observe the output
+    end
+    
+    // Finish simulation
+    #100;
+    $stop;
+end
+
+endmodule
