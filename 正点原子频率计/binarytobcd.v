@@ -30,7 +30,7 @@ always@(posedge sys_clk or negedge sys_rst_n)begin
     if(!sys_rst_n)
         data_shift <= 20'd0;
     else if(cnt_shift == 7'd0)
-        data_shift <= {14'b0,data};
+        data_shift <= {12'b0,data};
     else if((cnt_shift <= CNT_SHIFT_NUM)&&(!shift_flag))begin
         // Calculate the BCD value, each line corresponds to a different segment, preparing the entire number for BCD conversion.
         data_shift[11: 8] <= (data_shift[11: 8] > 4) ? (data_shift[11: 8] + 2'd3):(data_shift[11: 8]);

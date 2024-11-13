@@ -172,7 +172,7 @@ always @(posedge clk_6M or negedge reset_n) begin
             number <= 8'd0;
         else if(freq_x >= 68_000 && freq_x < 98_000)
             number <= 8'd1;
-        else if(freq_x >= 97_000 && freq_x < 17_000)
+        else if(freq_x >= 97_000 && freq_x < 170_000)
             number <= 8'd2;
         else if(freq_x >= 121_000 && freq_x < 131_000)
             number <= 8'd3;
