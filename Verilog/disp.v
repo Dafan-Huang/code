@@ -11,7 +11,7 @@ module disp(
     output reg [1:0] SEL;   // Only 2 digits
     output reg [7:0] SEG;
     
-    parameter MCNT_1MS = 1000000 /20 - 1;      // 1ms
+    parameter MCNT_1MS = 6000000 /20 - 1;      // 1ms
     parameter MCNT_SEL = 2 - 1; // 2 digits
     reg [15:0] cnt_1ms;
     reg [1:0] cnt_sel; // Change to 2-bit counter for 2 digits

@@ -46,21 +46,12 @@ CODE SEGMENT USE16
               MOV    AH,02H                        ;显示换行
               MOV    DL,0AH
               INT    21H
-
-       ; MOV    BL,BUF1+1                  ;实际输入的字符个数-->BX
-       ; MOV    BH,0
-       ; MOV    SI,OFFSET BUF1+2
-       ; MOV    BYTE PTR [BX+SI],'$'       ;字符串结束符
-
-       ; MOV    AH,09H                     ;复制用户输入的字符串
-       ; MOV    DX,OFFSET BUF1+2
-       ; INT    21H
        
        JUDGE1:
               MOV    SI,OFFSET BUF1+2              ;指向输入的用户名
               MOV    DI,OFFSET Username            ;指向系统设定的用户名
               MOV    CX,5                          ;用户名长度
-              N1:    CMP [SI],DI
+       N1:    CMP    [SI],DI
               JNE    ERROR                         ;如果不相等，重新输入用户名
               INC    SI
               INC    DI
@@ -98,7 +89,7 @@ CODE SEGMENT USE16
               MOV    SI,OFFSET BUF2+2              ;指向输入的密码
               MOV    DI,OFFSET Password            ;指向系统设定的密码
               MOV    CX,6                          ;密码长度
-              N2:    CMP [SI],DI
+       N2:    CMP    [SI],DI
               JNE    ERROR                         ;如果不相等，重新输入密码
               INC    SI
               INC    DI
