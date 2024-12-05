@@ -22,25 +22,25 @@ DATA ENDS
 CODE SEGMENT USE16
                    ASSUME CS:CODE, DS:DATA        ; 设置段寄存器
     BEG:           
-                   MOV    AX, DATA
-                   MOV    DS, AX
-                   CLI
-                   CALL   READ1C
-                   CALL   WRITE1C
-                   STI
+                   MOV    AX, DATA                ; 设置数据段地址
+                   MOV    DS, AX                  ; 设置数据段地址
+                   CLI                            ; 关中断
+                   CALL   READ1C                  ; 读取1C中断向量
+                   CALL   WRITE1C                 ; 写入1C中断向量
+                   STI                            ; 开中断
     SCAN:          
-                   CALL   WAIT_KEY
-                   JMP    SCAN
+                   CALL   WAIT_KEY                ; 等待键盘输入
+                   JMP    SCAN                    ; 循环
     
     WAIT_KEY:      
     ; 检查键盘输入
                    MOV    AH, 1
                    INT    16H
-                   JZ     WAIT_KEY
+                   JZ     WAIT_KEY                ; 没有按键则继续等待,否则退出
                    MOV    AH, 0
                    INT    16H
                    CLI
-                   CALL   RESET
+                   CALL   RESET                   ; 恢复1C中断向量
                    STI
     ; 退出程序
                    MOV    AH, 4CH
@@ -97,14 +97,14 @@ DISPLAY_TIME ENDP
 CONVERT_TO_DEC PROC
     ; 将二进制转换为十进制
                    MOV    AH, 0
-                   DIV    TEN
-                   ADD    AL, '0'
-                   ADD    AH, '0'
+                   DIV    TEN                     ;AH 是余数 AL 是商,从而可以分离10进制数的十位和个位
+                   ADD    AL, '0'                 ; 转换为ASCII码
+                   ADD    AH, '0'                 ; 转换为ASCII码
                    RET
 
 CONVERT_TO_DEC ENDP
 
-READ1C PROC
+READ1C PROC                                       ; 读取1C中断向量
                    MOV    AX, 351CH
                    INT    21H
                    MOV    WORD PTR OLD1C, BX
@@ -112,18 +112,18 @@ READ1C PROC
                    RET
 READ1C ENDP
 
-WRITE1C PROC
+WRITE1C PROC                                      ; 写入1C中断向量
                    push   DS
                    MOV    AX, CODE
                    MOV    DS, AX
-                   MOV    DX, OFFSET TIMER_ISR
+                   MOV    DX, OFFSET TIMER_ISR    ; 设置中断处理程序
                    MOV    AX, 251CH
                    INT    21H
                    POP    DS
                    RET
 WRITE1C ENDP
 
-RESET PROC
+RESET PROC                                        ; 恢复1C中断向量
                    MOV    DX, WORD PTR OLD1C
                    MOV    DS, WORD PTR OLD1C+2
                    MOV    AX, 251CH
