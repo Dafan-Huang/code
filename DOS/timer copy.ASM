@@ -10,13 +10,14 @@
 
 .586
 DATA SEGMENT USE16                       ; 数据段
-    HOUR     DB 0                        ; 时
-    MINUTE   DB 0                        ; 分
-    SECOND   DB 0                        ; 秒
+    HOUR     DB 23                       ; 时
+    MINUTE   DB 59                       ; 分
+    SECOND   DB 55                       ; 秒
     TIME_STR DB 'HH:MM:SS', 0DH , '$'    ; 时间字符串
     ;01:34:67
-    ;time_str
+    COUNT    DB 18                       ; 计数器
     OLD1C    DD ?                        ; 存放原1C中断向量
+    TEN      DB 10
 DATA ENDS
 
 CODE SEGMENT USE16
@@ -28,10 +29,6 @@ CODE SEGMENT USE16
                    CALL   READ1C                  ; 读取1C中断向量
                    CALL   WRITE1C                 ; 写入1C中断向量
                    STI                            ; 开中断
-    SCAN:          
-                   CALL   WAIT_KEY                ; 等待键盘输入
-                   JMP    SCAN                    ; 循环
-    
     CHECK_KEY:     
     ; 检查键盘输入
                    MOV    AH, 1                   ; DOS功能号01H，检查键盘
@@ -47,19 +44,38 @@ CODE SEGMENT USE16
 TIMER_ISR PROC FAR
                    PUSHA
     ; 更新时间
-                   MOV    AH, 2CH                 ;  读取时间
-                   INT    21H                     ;  AL=时，CH=分，DH=秒
-                   MOV    HOUR, CH                ; 保存时间
-                   MOV    MINUTE, CL              ; 保存时间
-                   MOV    SECOND, DH              ; 保存时间
-        
+                   DEC    COUNT                   ; 计数器减1
+                   JNZ    END_UPDATE              ; 如果计数器不为0，跳转到END_UPDATE
+                   MOV    COUNT, 18               ; 否则，重置计数器为18（大约1秒）
+
+                   MOV    AL, HOUR                ; 设定初始时
+                   MOV    HOUR, AL
+                   MOV    AL, MINUTE              ; 设定初始分
+                   MOV    MINUTE, AL
+                   MOV    AL, SECOND              ; 设定初始秒
+                   MOV    SECOND, AL
+
+                   INC    SECOND                  ; 秒自增
+                   CMP    SECOND, 60              ; 检查是否达到60秒
+                   JNE    UPDATE_MINUTE           ; 如果不到60秒，跳转到UPDATE_MINUTE
+                   MOV    SECOND, 0               ; 否则，秒归零
+                   INC    MINUTE                  ; 分钟自增
+                   
+    UPDATE_MINUTE: 
+                   CMP    MINUTE, 60              ; 检查是否达到60分钟
+                   JNE    UPDATE_HOUR             ; 如果不到60分钟，跳转到UPDATE_HOUR
+                   MOV    MINUTE, 0               ; 否则，分钟归零
+                   INC    HOUR                    ; 小时自增
+                   
+    UPDATE_HOUR:   
+                   CMP    HOUR, 24                ; 检查是否达到24小时
+                   JNE    END_UPDATE              ; 如果不到24小时，跳转到END_UPDATE
+                   MOV    HOUR, 0                 ; 否则，小时归零
+                   
+    END_UPDATE:    
     ; 显示时间
                    CALL   DISPLAY_TIME            ; 显示时间
-        
-    ; 发送EOI信号
-                   MOV    AL, 20H                 ; 发送EOI信号
-                   OUT    20H, AL                 ; 发送EOI信号
-        
+
                    POPA
                    IRET
 TIMER_ISR ENDP
@@ -88,12 +104,12 @@ DISPLAY_TIME PROC
                    RET
 DISPLAY_TIME ENDP
 
-    TEN            DB     10
+
 
 CONVERT_TO_DEC PROC
     ; 将二进制转换为十进制
                    MOV    AH, 0
-                   DIV    TEN                     ;AH 是余数 AL 是商,从而可以分离10进制数的十位和个位
+                   DIV    TEN                     ; AH 是余数 AL 是商,从而可以分离10进制数的十位和个位
                    ADD    AL, '0'                 ; 转换为ASCII码
                    ADD    AH, '0'                 ; 转换为ASCII码
                    RET
@@ -109,7 +125,7 @@ READ1C PROC                                       ; 读取1C中断向量
 READ1C ENDP
 
 WRITE1C PROC                                      ; 写入1C中断向量
-                   push   DS
+                   PUSH   DS
                    MOV    AX, CODE
                    MOV    DS, AX
                    MOV    DX, OFFSET TIMER_ISR    ; 设置中断处理程序
