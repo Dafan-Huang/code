@@ -48,13 +48,6 @@ TIMER_ISR PROC FAR
                    JNZ    END_UPDATE              ; 如果计数器不为0，跳转到END_UPDATE
                    MOV    COUNT, 18               ; 否则，重置计数器为18（大约1秒）
 
-                   MOV    AL, HOUR                ; 设定初始时
-                   MOV    HOUR, AL
-                   MOV    AL, MINUTE              ; 设定初始分
-                   MOV    MINUTE, AL
-                   MOV    AL, SECOND              ; 设定初始秒
-                   MOV    SECOND, AL
-
                    INC    SECOND                  ; 秒自增
                    CMP    SECOND, 60              ; 检查是否达到60秒
                    JNE    UPDATE_MINUTE           ; 如果不到60秒，跳转到UPDATE_MINUTE
