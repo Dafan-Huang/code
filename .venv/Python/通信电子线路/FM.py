@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Parameters
-carrier_freq = 10e3  # Carrier frequency in Hz
+carrier_freq = 500*10e3  # Carrier frequency in Hz
 modulating_freq = 1e3  # Modulating frequency in Hz
 freq_deviation = 500  # Frequency deviation in Hz
 sampling_rate = 100e3  # Sampling rate in Hz

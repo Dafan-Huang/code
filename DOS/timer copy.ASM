@@ -29,6 +29,12 @@ CODE SEGMENT USE16
                    CALL   READ1C                  ; 读取1C中断向量
                    CALL   WRITE1C                 ; 写入1C中断向量
                    STI                            ; 开中断
+                ; 获取系统时间
+                MOV    AH, 2CH                 ; DOS功能号2CH，获取系统时间
+                INT    21H                     ; 调用DOS功能
+                MOV    HOUR, CH                ; 保存小时
+                MOV    MINUTE, CL              ; 保存分钟
+                MOV    SECOND, DH              ; 保存秒
     CHECK_KEY:     
     ; 检查键盘输入
                    MOV    AH, 1                   ; DOS功能号01H，检查键盘

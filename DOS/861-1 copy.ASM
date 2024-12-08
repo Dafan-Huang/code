@@ -32,7 +32,6 @@ CODE SEGMENT USE16
               MOV    AH, 4CH                 ; DOS功能号4CH，退出程序
               INT    21H                     ; 调用DOS功能
 
-
 SERVICE PROC                                 ; 1C中断服务程序
               PUSHA                          ; 保护现场  将所有寄存器压栈
               PUSH   DS                      ; 保护现场  将DS压栈
@@ -62,7 +61,7 @@ READ1C ENDP                                  ; 读取1C中断向量结束
 
 WRITE1C PROC                                 ; 设置1C中断向量
               PUSH   DS                      ; 保护现场
-              MOV    AX, CODE                ; 初始化代码段
+              MOV    AX, SEG SERVICE         ; 初始化代码段
               MOV    DS, AX                  ; 初始化代码段
               MOV    DX, OFFSET SERVICE      ; 设置1C中断服务程序
               MOV    AX, 251CH               ; DOS功能号25H，设置中断向量
