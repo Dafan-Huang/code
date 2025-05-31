@@ -3,6 +3,9 @@
         {
             "name": "Win32",
             "includePath": [
+                "D:/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/12.2.0/include",
+                "D:/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/12.2.0/include-fixed",
+                "D:/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/12.2.0/../../../../x86_64-w64-mingw32/include",
                 "${workspaceFolder}/**"
             ],
             "defines": [
