@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
 from PIL import Image, ImageTk
 import os
+import threading
 
 class LibraryManager:
     def __init__(self, root):
@@ -129,3 +130,16 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # 使用线程异步加载背景图片，避免主界面卡顿
+
+    def async_set_background(root, image_path, callback):
+        def load_bg():
+            if not os.path.exists(image_path):
+                callback(None, None)
+                return
+            bg_image = Image.open(image_path)
+            callback(bg_image, image_path)
+        threading.Thread(target=load_bg, daemon=True).start()
+
+    # 示例用法（可替换 main 中的 set_background 调用）：
+    # async_set_background(root, bg_path, lambda img, path: ... )
