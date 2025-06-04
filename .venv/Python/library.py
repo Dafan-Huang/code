@@ -1,6 +1,29 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
+import json
+import os
+import csv
+import datetime
 
+BOOKS_FILE = "books.txt"
+READERS_FILE = "readers.txt"
+HISTORY_FILE = "borrow_history.json"
+
+# ========== 工具函数 ==========
+def load_json(filename, default):
+    if not os.path.exists(filename):
+        return default
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default
+
+def save_json(filename, data):
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+# ========== 登录对话框 ==========
 class LoginDialog(simpledialog.Dialog):
     def body(self, master):
         tk.Label(master, text="用户名:").grid(row=0, column=0, sticky=tk.W)
@@ -30,24 +53,103 @@ def login(users):
         else:
             messagebox.showerror("登录失败", "用户名或密码错误，请重试。")
 
+# ========== 读者管理 ==========
 class ReaderManager:
     def __init__(self):
-        self.readers = {'reader': {'password': 'reader123', 'role': '读者'}}
+        self.readers = load_json(READERS_FILE, {'reader': {'password': 'reader123', 'role': '读者'}})
 
     def add_reader(self, username, password="reader123"):
         if username in self.readers:
             return False
         self.readers[username] = {'password': password, 'role': '读者'}
+        self.save()
         return True
 
     def delete_reader(self, username):
         if username == 'reader':
             return False
-        return self.readers.pop(username, None) is not None
+        result = self.readers.pop(username, None) is not None
+        if result:
+            self.save()
+        return result
 
     def get_readers(self):
         return list(self.readers.keys())
 
+    def save(self):
+        save_json(READERS_FILE, self.readers)
+
+# ========== 借阅历史 ==========
+def load_history():
+    return load_json(HISTORY_FILE, {})
+
+def save_history(data):
+    save_json(HISTORY_FILE, data)
+
+class BorrowHistory:
+    def __init__(self):
+        self.history = load_history()
+
+    def add_record(self, username, isbn, action):
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.history.setdefault(username, []).append({
+            "isbn": isbn,
+            "action": action,
+            "time": now
+        })
+        save_history(self.history)
+
+    def get_user_history(self, username):
+        return self.history.get(username, [])
+
+    def get_all_history(self):
+        return self.history
+
+# ========== 密码修改 ==========
+def change_password(reader_manager, username, parent=None):
+    old = simpledialog.askstring("修改密码", "请输入原密码：", show="*", parent=parent)
+    if not old or reader_manager.readers[username]["password"] != old:
+        messagebox.showwarning("提示", "原密码错误", parent=parent)
+        return
+    new = simpledialog.askstring("修改密码", "请输入新密码：", show="*", parent=parent)
+    if not new:
+        return
+    reader_manager.readers[username]["password"] = new
+    reader_manager.save()
+    messagebox.showinfo("成功", "密码修改成功", parent=parent)
+
+# ========== 图书导入导出 ==========
+def export_books(books):
+    with open("books_export.csv", "w", newline='', encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["title", "author", "isbn", "count", "category", "publisher"])
+        writer.writeheader()
+        for b in books:
+            writer.writerow(b)
+
+def import_books():
+    filename = simpledialog.askstring("导入图书", "请输入CSV文件名：")
+    if not filename or not os.path.exists(filename):
+        messagebox.showwarning("提示", "文件不存在")
+        return []
+    with open(filename, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        return [row for row in reader]
+
+# ========== 管理员查看所有借阅 ==========
+def show_all_borrowed(history, parent=None):
+    win = tk.Toplevel(parent)
+    win.title("所有读者借阅情况")
+    win.geometry("500x400")
+    tree = ttk.Treeview(win, columns=("用户名", "ISBN", "操作", "时间"), show="headings")
+    for col in ("用户名", "ISBN", "操作", "时间"):
+        tree.heading(col, text=col)
+        tree.column(col, width=120, anchor="center")
+    tree.pack(fill=tk.BOTH, expand=True)
+    for user, records in history.get_all_history().items():
+        for rec in records:
+            tree.insert("", tk.END, values=(user, rec["isbn"], rec["action"], rec["time"]))
+
+# ========== 主界面 ==========
 class LibraryManager:
     def __init__(self, root, role="管理员", username="admin", reader_manager=None):
         self.root = root
@@ -55,22 +157,27 @@ class LibraryManager:
         self.username = username
         self.reader_manager = reader_manager
         self.root.title("图书馆管理系统")
-        self.books = []
+        self.books = load_json(BOOKS_FILE, [])
         self.borrowed_books = set()
+        self.history = BorrowHistory()
         self.create_widgets()
         self.refresh_books()
         self.set_role_permissions()
 
+    def save_books(self):
+        save_json(BOOKS_FILE, self.books)
+
     def create_widgets(self):
+        # 图书列表
         self.tree = ttk.Treeview(self.root, columns=('书名', '作者', 'ISBN'), show='headings', height=15)
         for col in ('书名', '作者', 'ISBN'):
             self.tree.heading(col, text=col)
             self.tree.column(col, width=150, anchor='center')
         self.tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
+        # 操作按钮
         self.btn_frame = tk.Frame(self.root, bg='#f0f0f0')
         self.btn_frame.pack(pady=5, fill=tk.X)
-
         self.button_widgets = []
         self.btns = [
             ("添加图书", self.add_book),
@@ -93,17 +200,54 @@ class LibraryManager:
             manage_btn = tk.Button(self.btn_frame, text="读者管理", command=self.manage_readers, width=10)
             manage_btn.pack(side=tk.LEFT, padx=5)
 
+        # 新增功能按钮
+        extra_btn_frame = tk.Frame(self.root, bg='#f0f0f0')
+        extra_btn_frame.pack(pady=2, fill=tk.X)
+        if self.role == "读者":
+            tk.Button(extra_btn_frame, text="修改密码", command=lambda: change_password(self.reader_manager, self.username, self.root), width=10).pack(side=tk.LEFT, padx=5)
+            tk.Button(extra_btn_frame, text="借阅历史", command=self.show_my_history, width=10).pack(side=tk.LEFT, padx=5)
+        if self.role == "管理员":
+            tk.Button(extra_btn_frame, text="导出图书", command=lambda: export_books(self.books), width=10).pack(side=tk.LEFT, padx=5)
+            tk.Button(extra_btn_frame, text="导入图书", command=self.import_books_dialog, width=10).pack(side=tk.LEFT, padx=5)
+            tk.Button(extra_btn_frame, text="查看借阅情况", command=lambda: show_all_borrowed(self.history, self.root), width=12).pack(side=tk.LEFT, padx=5)
+
     def set_role_permissions(self):
         if self.role == "读者":
             for btn, (text, _) in zip(self.button_widgets, self.btns):
                 if text not in ("查询图书", "显示全部"):
                     btn["state"] = tk.DISABLED
 
+    def get_book_info(self, book=None):
+        info = {}
+        info['title'] = simpledialog.askstring("书名", "请输入书名：", initialvalue=book['title'] if book else "")
+        if not info['title']:
+            return None
+        info['author'] = simpledialog.askstring("作者", "请输入作者：", initialvalue=book['author'] if book else "")
+        if not info['author']:
+            return None
+        info['isbn'] = simpledialog.askstring("ISBN", "请输入ISBN：", initialvalue=book['isbn'] if book else "")
+        if not info['isbn']:
+            return None
+        info['count'] = int(simpledialog.askstring("库存数量", "请输入库存数量：", initialvalue=str(book.get('count', 1) if book else "1")) or "1")
+        info['category'] = simpledialog.askstring("类别", "请输入类别：", initialvalue=book.get('category', "") if book else "")
+        info['publisher'] = simpledialog.askstring("出版社", "请输入出版社：", initialvalue=book.get('publisher', "") if book else "")
+        return info
+
+    def refresh_books(self, books=None):
+        self.tree.delete(*self.tree.get_children())
+        valid_books = [
+            book for book in (books if books is not None else self.books)
+            if isinstance(book, dict) and 'title' in book and 'author' in book and 'isbn' in book
+        ]
+        for book in valid_books:
+            self.tree.insert('', tk.END, values=(book['title'], book['author'], book['isbn']))
+
     def add_book(self):
         book = self.get_book_info()
         if book:
             if not any(b['isbn'] == book['isbn'] for b in self.books):
                 self.books.append(book)
+                self.save_books()
                 self.refresh_books()
             else:
                 messagebox.showwarning("提示", "该图书已存在")
@@ -118,6 +262,7 @@ class LibraryManager:
         new_book = self.get_book_info(book)
         if new_book:
             self.books[idx] = new_book
+            self.save_books()
             self.refresh_books()
 
     def delete_book(self):
@@ -127,6 +272,7 @@ class LibraryManager:
             return
         idx = self.tree.index(selected[0])
         del self.books[idx]
+        self.save_books()
         self.refresh_books()
 
     def search_book(self):
@@ -141,28 +287,6 @@ class LibraryManager:
             ]
             self.refresh_books(results)
 
-    def refresh_books(self, books=None):
-        self.tree.delete(*self.tree.get_children())
-        valid_books = [
-            book for book in (books if books is not None else self.books)
-            if isinstance(book, dict) and 'title' in book and 'author' in book and 'isbn' in book
-        ]
-        for book in valid_books:
-            self.tree.insert('', tk.END, values=(book['title'], book['author'], book['isbn']))
-
-    def get_book_info(self, book=None):
-        info = {}
-        info['title'] = simpledialog.askstring("书名", "请输入书名：", initialvalue=book['title'] if book else "")
-        if not info['title']:
-            return None
-        info['author'] = simpledialog.askstring("作者", "请输入作者：", initialvalue=book['author'] if book else "")
-        if not info['author']:
-            return None
-        info['isbn'] = simpledialog.askstring("ISBN", "请输入ISBN：", initialvalue=book['isbn'] if book else "")
-        if not info['isbn']:
-            return None
-        return info
-
     # 读者功能
     def borrow_book(self):
         selected = self.tree.selection()
@@ -171,10 +295,16 @@ class LibraryManager:
             return
         idx = self.tree.index(selected[0])
         book = self.books[idx]
+        if book.get('count', 1) <= 0:
+            messagebox.showinfo("提示", "该图书已无库存")
+            return
         if book['isbn'] in self.borrowed_books:
             messagebox.showinfo("提示", "您已借阅该图书")
             return
         self.borrowed_books.add(book['isbn'])
+        self.books[idx]['count'] = book.get('count', 1) - 1
+        self.save_books()
+        self.history.add_record(self.username, book['isbn'], "借阅")
         messagebox.showinfo("借书成功", f"您已借阅《{book['title']}》")
 
     def return_book(self):
@@ -192,9 +322,27 @@ class LibraryManager:
         choice = choice.strip()
         if choice in self.borrowed_books:
             self.borrowed_books.remove(choice)
+            for b in self.books:
+                if b['isbn'] == choice:
+                    b['count'] = b.get('count', 0) + 1
+                    break
+            self.save_books()
+            self.history.add_record(self.username, choice, "归还")
             messagebox.showinfo("还书成功", f"ISBN为{choice}的图书已归还")
         else:
             messagebox.showwarning("提示", "您未借阅该ISBN的图书")
+
+    def show_my_history(self):
+        win = tk.Toplevel(self.root)
+        win.title("我的借阅历史")
+        win.geometry("500x400")
+        tree = ttk.Treeview(win, columns=("ISBN", "操作", "时间"), show="headings")
+        for col in ("ISBN", "操作", "时间"):
+            tree.heading(col, text=col)
+            tree.column(col, width=150, anchor="center")
+        tree.pack(fill=tk.BOTH, expand=True)
+        for rec in self.history.get_user_history(self.username):
+            tree.insert("", tk.END, values=(rec["isbn"], rec["action"], rec["time"]))
 
     # 管理员功能
     def manage_readers(self):
@@ -246,15 +394,32 @@ class LibraryManager:
 
         refresh_readers()
 
+    def import_books_dialog(self):
+        imported = import_books()
+        if imported:
+            for b in imported:
+                if not any(book['isbn'] == b['isbn'] for book in self.books):
+                    book = {
+                        "title": b.get("title", ""),
+                        "author": b.get("author", ""),
+                        "isbn": b.get("isbn", ""),
+                        "count": int(b.get("count", 1)),
+                        "category": b.get("category", ""),
+                        "publisher": b.get("publisher", ""),
+                    }
+                    self.books.append(book)
+            self.save_books()
+            self.refresh_books()
+            messagebox.showinfo("导入成功", f"成功导入{len(imported)}本图书")
+
+# ========== 程序入口 ==========
 def main():
     root = tk.Tk()
     root.withdraw()
     reader_manager = ReaderManager()
-    # 管理员账号
     users = {
         "admin": {"password": "admin123", "role": "管理员"},
     }
-    # 加入所有读者账号
     users.update(reader_manager.readers)
     username, role = login(users)
     if username is None:
