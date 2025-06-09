@@ -1,3 +1,9 @@
+//  5. 进制转换器（10分）
+
+// 可输入二进制、八进制、十进制、十六进制数；
+// 将已输入的数转换成其余进制的数；
+// 具有输入输出界面。
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -64,7 +70,7 @@ int main() {
         system("clear");
 #endif
         cout << "===== 进制转换器 =====" << endl;
-        cout << "请输入一个数（支持二进制0b, 八进制0, 十进制, 十六进制0x前缀）:" << endl;
+        cout << "请输入一个数(支持二进制0b, 八进制0, 十进制, 十六进制0x前缀):" << endl;
         string input;
         cin >> input;
 
@@ -79,7 +85,7 @@ int main() {
             cout << "十六进制: " << toBase(value, 16) << endl;
         }
 
-        cout << "\n是否继续转换？(y/n): ";
+        cout << "\n是否继续转换?(y/n): ";
         string choice;
         cin >> choice;
         if (choice != "y" && choice != "Y") break;

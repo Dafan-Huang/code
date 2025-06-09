@@ -1,3 +1,9 @@
+//  3. 文本编辑器（10分）
+
+// 编辑文本；
+// 保存、打开指定位置的文本文件；
+// 具有输入输出界面。
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -13,7 +19,7 @@ void showMenu() {
 }
 
 void editText(std::string &text) {
-    std::cout << "请输入文本（输入单独一行END结束）：\n";
+    std::cout << "请输入文本(输入单独一行END结束):\n";
     text.clear();
     std::string line;
     while (true) {
