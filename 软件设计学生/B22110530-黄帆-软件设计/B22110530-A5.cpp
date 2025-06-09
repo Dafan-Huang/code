@@ -54,12 +54,38 @@ bool parseInput(const string& input, int& value, int& base) {
 // 十进制转为其他进制字符串
 string toBase(int value, int base) {
     if (base == 10) return to_string(value);
-    stringstream ss;
-    if (base == 2) ss << "0b";
-    else if (base == 8) ss << "0";
-    else if (base == 16) ss << "0x";
-    ss << std::setbase(base) << std::uppercase << value;
-    return ss.str();
+    string result;
+    unsigned int uvalue = static_cast<unsigned int>(value);
+    if (base == 2) {
+        result = "0b";
+        string bin;
+        if (uvalue == 0) bin = "0";
+        while (uvalue) {
+            bin = char('0' + (uvalue % 2)) + bin;
+            uvalue /= 2;
+        }
+        result += bin;
+    } else if (base == 8) {
+        result = "0";
+        string oct;
+        if (uvalue == 0) oct = "0";
+        while (uvalue) {
+            oct = char('0' + (uvalue % 8)) + oct;
+            uvalue /= 8;
+        }
+        result += oct;
+    } else if (base == 16) {
+        result = "0x";
+        string hex;
+        if (uvalue == 0) hex = "0";
+        while (uvalue) {
+            int digit = uvalue % 16;
+            hex = (digit < 10 ? char('0' + digit) : char('A' + digit - 10)) + hex;
+            uvalue /= 16;
+        }
+        result += hex;
+    }
+    return result;
 }
 
 int main() {
@@ -92,3 +118,36 @@ int main() {
     }
     return 0;
 }
+
+/*
+    进制转换器程序
+
+    功能简介:
+    - 支持输入二进制(0b前缀)、八进制(0前缀)、十进制、十六进制(0x前缀)的数字。
+    - 自动识别输入数字的进制，并将其转换为其它三种进制格式输出。
+    - 提供简单的输入输出界面，支持多次转换操作。
+
+    主要函数说明:
+    1. isValidNumber(const string& s, int base)
+        - 检查字符串s是否为合法的指定进制(base)数字。
+        - 支持二进制、八进制、十进制、十六进制的合法性判断。
+
+    2. parseInput(const string& input, int& value, int& base)
+        - 自动识别输入字符串input的进制类型，并转换为十进制整数value。
+        - 识别0b、0x、0前缀，分别对应二进制、十六进制、八进制。
+        - 返回识别到的进制base。
+        - 若输入非法，返回false。
+
+    3. toBase(int value, int base)
+        - 将十进制整数value转换为指定进制(base)的字符串表示。
+        - 输出带有标准前缀(如0b, 0, 0x)的格式。
+
+    使用说明:
+    - 运行程序后，输入需要转换的数字（支持0b、0、0x前缀）。
+    - 程序会输出该数字的十进制、二进制、八进制、十六进制表示。
+    - 可选择是否继续进行下一次转换。
+
+    注意事项:
+    - 输入格式需符合对应进制的合法字符范围。
+    - 输入非法时会提示错误信息。
+*/

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 
+
 int main() {
     std::string plaintext, ciphertext = "";
     int key;
@@ -25,3 +26,15 @@ int main() {
 
     return 0;
 }
+
+/**
+ * @brief 主函数，实现简单的凯撒加密算法。
+ *
+ * 程序流程如下：
+ * 1. 提示用户输入明文字符串。
+ * 2. 提示用户输入一个整数作为密钥。
+ * 3. 对明文中的每个字符，将其ASCII值加上密钥，生成密文。
+ * 4. 输出加密后的密文。
+ *
+ * @return int 程序执行状态码，正常结束返回0。
+ */
