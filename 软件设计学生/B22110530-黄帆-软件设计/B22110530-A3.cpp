@@ -66,6 +66,20 @@ void showText(const std::string &text) {
     std::cout << text << "\n";
 }
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <cstdlib>
+#endif
+
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
 int main() {
     std::string text;
     int choice;
@@ -74,16 +88,24 @@ int main() {
         std::string input;
         std::getline(std::cin, input);
         if (input.empty()) continue;
-        choice = std::stoi(input);
+        try {
+            choice = std::stoi(input);
+        } catch (...) {
+            std::cout << "请输入有效的数字。\n";
+            continue;
+        }
         switch (choice) {
             case 1:
                 editText(text);
+                clearScreen();
                 break;
             case 2:
                 saveToFile(text);
+                clearScreen();
                 break;
             case 3:
                 openFromFile(text);
+                clearScreen();
                 break;
             case 4:
                 showText(text);
