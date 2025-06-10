@@ -2,7 +2,9 @@
     "files.associations": {
         "menu.h": "c",
         "string": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "iostream": "cpp"
     },
     "python.linting.enabled": true,
     "python.testing.unittestArgs": [

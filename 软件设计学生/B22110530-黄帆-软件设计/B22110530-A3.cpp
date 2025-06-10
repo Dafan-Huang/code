@@ -1,5 +1,5 @@
 // 3. 文本编辑器（10分）
-
+//
 // 编辑文本；
 // 保存、打开指定位置的文本文件；
 // 具有输入输出界面。
@@ -7,6 +7,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <cstdlib>
+#endif
 
 void showMenu() {
     std::cout << "\n--- 文本编辑器 ---\n";
@@ -18,15 +24,25 @@ void showMenu() {
     std::cout << "请选择操作: ";
 }
 
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
 void editText(std::string &text) {
-    std::cout << "请输入文本(输入单独一行END结束):\n";
-    text.clear();
-    std::string line;
+    std::cout << "当前文本内容如下：\n";
+    std::cout << text;
+    std::cout << "请输入新的文本内容(输入单独一行END结束,将覆盖原内容):\n";
+    std::string newText, line;
     while (true) {
         std::getline(std::cin, line);
         if (line == "END") break;
-        text += line + "\n";
+        newText += line + "\n";
     }
+    text = newText;
 }
 
 void saveToFile(const std::string &text) {
@@ -64,20 +80,6 @@ void openFromFile(std::string &text) {
 void showText(const std::string &text) {
     std::cout << "\n--- 当前文本 ---\n";
     std::cout << text << "\n";
-}
-
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <cstdlib>
-#endif
-
-void clearScreen() {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
 }
 
 
