@@ -1,5 +1,5 @@
 // 2. 打字程序（10分）
-
+//
 // 随机产生一字符串，每次产生的字符串内容、长度都不同；
 // 根据结果输入字符串，判断输入是否正确，输出正确率；
 // 具有输入输出界面。
@@ -12,45 +12,49 @@
 #include <algorithm>
 
 // 随机生成字符串
+// 参数：minLen - 最小长度，maxLen - 最大长度
+// 返回值：生成的随机字符串
 std::string generateRandomString(int minLen = 5, int maxLen = 10) {
     static const char charset[] =
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "0123456789";
-    int len = minLen + rand() % (maxLen - minLen + 1);
+        "0123456789"; // 字符集：小写字母、大写字母、数字
+    int len = minLen + rand() % (maxLen - minLen + 1); // 随机生成字符串长度
     std::string result;
     for (int i = 0; i < len; ++i) {
-        result += charset[rand() % (sizeof(charset) - 1)];
+        result += charset[rand() % (sizeof(charset) - 1)]; // 随机选择字符
     }
     return result;
 }
 
 // 计算正确率
+// 参数：target - 目标字符串，input - 用户输入字符串
+// 返回值：正确率（百分比）
 double calcAccuracy(const std::string& target, const std::string& input) {
-    int correct = 0;
-    int minLen = std::min(target.size(), input.size());
+    int correct = 0; // 正确字符计数
+    int minLen = std::min(target.size(), input.size()); // 取两者较短长度
     for (int i = 0; i < minLen; ++i) {
-        if (target[i] == input[i]) ++correct;
+        if (target[i] == input[i]) ++correct; // 逐字符比较，统计正确数
     }
-    return 100.0 * correct / target.size();
+    return 100.0 * correct / target.size(); // 正确率=正确字符数/目标字符串长度
 }
 
 int main() {
-    srand((unsigned)time(0));
-    std::string randomStr = generateRandomString();
+    srand((unsigned)time(0)); // 初始化随机数种子
+    std::string randomStr = generateRandomString(); // 生成随机字符串
     std::string userInput;
 
     // 控制台界面
     std::cout << "===== 随机字符串输入测试 =====" << std::endl;
     std::cout << "请根据下方随机字符串输入内容：" << std::endl;
-    std::cout << randomStr << std::endl;
+    std::cout << randomStr << std::endl; // 显示随机字符串
     std::cout << "请输入：";
-    std::getline(std::cin, userInput);
+    std::getline(std::cin, userInput); // 获取用户输入
 
-    double accuracy = calcAccuracy(randomStr, userInput);
+    double accuracy = calcAccuracy(randomStr, userInput); // 计算正确率
     std::cout << "你的输入正确率为：" << accuracy << "%" << std::endl;
 
-   // system("pause");
+    // system("pause"); // 可选：暂停程序
     return 0;
 }
 
