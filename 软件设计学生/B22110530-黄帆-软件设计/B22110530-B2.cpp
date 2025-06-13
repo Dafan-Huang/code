@@ -8,18 +8,19 @@
 using namespace std;
 
 // 常量定义
-const double LOCAL_BASE_FEE = 0.5;
-const double LOCAL_INC_FEE = 0.2;
-const int LOCAL_BASE_TIME = 180; // 3分钟=180秒
-const int LOCAL_INC_TIME = 180;  // 每3分钟递增
+const double LOCAL_BASE_FEE = 0.5;      // 本地通话基础费用（前3分钟）
+const double LOCAL_INC_FEE = 0.2;       // 本地通话每递增3分钟的费用
+const int LOCAL_BASE_TIME = 180;        // 本地通话基础时长（3分钟=180秒）
+const int LOCAL_INC_TIME = 180;         // 本地通话递增时长（每3分钟）
 
-// 用户类
+// 用户类，管理用户信息
 class User {
 public:
-    string phone;
-    string name;
+    string phone;   // 电话号码
+    string name;    // 用户名
     User() {}
     User(const string& p, const string& n) : phone(p), name(n) {}
+    // 从文件加载用户信息，返回电话号码到用户名的映射
     static map<string, string> loadUsers(const string& filename) {
         map<string, string> users;
         ifstream fin(filename);
@@ -31,17 +32,18 @@ public:
     }
 };
 
-// 话单类
+// 话单类，管理每一条通话记录
 class Callist {
 public:
-    string caller_area, caller_phone;
-    string callee_area, callee_phone;
-    int duration; // 秒
+    string caller_area, caller_phone;   // 主叫区号、主叫号码
+    string callee_area, callee_phone;   // 被叫区号、被叫号码
+    int duration;                       // 通话时长（秒）
 
     Callist() {}
     Callist(const string& ca, const string& cp, const string& cea, const string& cep, int d)
         : caller_area(ca), caller_phone(cp), callee_area(cea), callee_phone(cep), duration(d) {}
 
+    // 从文件加载所有话单，返回通话记录的vector
     static vector<Callist> loadCallists(const string& filename) {
         vector<Callist> calls;
         ifstream fin(filename);
@@ -54,15 +56,16 @@ public:
     }
 };
 
-// 费用类
+// 费用类，继承自Callist，增加通话类型和费用
 class Charge : public Callist {
 public:
-    int type; // 0:本地, 1:长途
-    double fee;
+    int type;       // 0:本地, 1:长途
+    double fee;     // 通话费用
 
     Charge(const Callist& c, int t, double f)
         : Callist(c), type(t), fee(f) {}
 
+    // 从文件加载长途费率，返回区号到费率的映射
     static map<string, double> loadRates(const string& filename) {
         map<string, double> rates;
         ifstream fin(filename);
@@ -74,25 +77,28 @@ public:
         return rates;
     }
 
+    // 计算本地通话费用
     static double calcLocalFee(int seconds) {
         if (seconds <= LOCAL_BASE_TIME) return LOCAL_BASE_FEE;
         int extra = seconds - LOCAL_BASE_TIME;
-        int inc = (extra + LOCAL_INC_TIME - 1) / LOCAL_INC_TIME;
+        int inc = (extra + LOCAL_INC_TIME - 1) / LOCAL_INC_TIME; // 向上取整
         return LOCAL_BASE_FEE + inc * LOCAL_INC_FEE;
     }
 
+    // 计算长途通话费用
     static double calcLongFee(int seconds, double rate) {
-        int mins = (seconds + 59) / 60;
+        int mins = (seconds + 59) / 60; // 不足1分钟按1分钟计
         return mins * rate;
     }
 
+    // 计算所有通话的费用，返回Charge对象的vector
     static vector<Charge> calcCharges(const vector<Callist>& calls, const map<string, double>& rates) {
         vector<Charge> charges;
         for (const auto& c : calls) {
-            if (c.caller_area == c.callee_area) {
+            if (c.caller_area == c.callee_area) { // 本地通话
                 double fee = calcLocalFee(c.duration);
                 charges.emplace_back(c, 0, fee);
-            } else {
+            } else { // 长途通话
                 double rate = 0.0;
                 auto it = rates.find(c.callee_area);
                 if (it != rates.end()) rate = it->second;
@@ -103,6 +109,7 @@ public:
         return charges;
     }
 
+    // 将所有费用明细保存到文件
     static void saveCharges(const vector<Charge>& charges, const string& filename) {
         ofstream fout(filename);
         for (const auto& ch : charges) {
@@ -110,7 +117,7 @@ public:
         }
     }
 
-    // 查询费用
+    // 查询某个电话号码的费用明细并输出
     static void queryFee(const string& phone, const string& chargefile, const map<string, string>& users) {
         ifstream fin(chargefile);
         string p;
@@ -139,7 +146,7 @@ public:
         cout << "--------------------------------------------------------" << endl;
     }
 
-    // 查询话单
+    // 查询某个电话号码的通话详单并输出
     static void queryCallist(const string& phone, const vector<Callist>& calls, const map<string, string>& users) {
         string name = users.count(phone) ? users.at(phone) : "未知";
         cout << "---------------------------------------------------------------" << endl;
@@ -160,6 +167,7 @@ public:
     }
 };
 
+// 清屏函数，支持Windows和Linux
 void clearScreen() {
 #ifdef _WIN32
     system("cls");
@@ -168,6 +176,7 @@ void clearScreen() {
 #endif
 }
 
+// 暂停屏幕函数，支持Windows和Linux
 void pauseScreen() {
 #ifdef _WIN32
     system("pause");
@@ -178,6 +187,7 @@ void pauseScreen() {
 #endif
 }
 
+// 菜单显示函数
 void menu() {
     cout << "======================================" << endl;
     cout << "      电话计费系统" << endl;
@@ -193,11 +203,12 @@ void menu() {
 #include <cstdlib>
 
 int main() {
+    // 加载用户、话单、费率数据
     map<string, string> users = User::loadUsers("C:/Users/24096/Desktop/code/软件设计学生/B22110530-黄帆-软件设计/yh.dat");
     vector<Callist> calls = Callist::loadCallists("C:/Users/24096/Desktop/code/软件设计学生/B22110530-黄帆-软件设计/hd.dat");
     map<string, double> rates = Charge::loadRates("C:/Users/24096/Desktop/code/软件设计学生/B22110530-黄帆-软件设计/fl.dat");
     vector<Charge> charges;
-    bool fee_calculated = false;
+    bool fee_calculated = false; // 标记是否已计算费用
 
     while (true) {
         clearScreen();
@@ -205,16 +216,16 @@ int main() {
         int op;
         cin >> op;
         clearScreen();
-        if (op == 0) {
+        if (op == 0) { // 退出
             cout << "感谢使用，再见！" << endl;
             break;
         }
-        if (op == 1) {
+        if (op == 1) { // 计算费用
             charges = Charge::calcCharges(calls, rates);
             Charge::saveCharges(charges, "fy.dat");
             cout << "费用计算完成，已保存到 fy.dat" << endl;
             fee_calculated = true;
-        } else if (op == 2) {
+        } else if (op == 2) { // 话费查询
             if (!fee_calculated) {
                 cout << "请先进行费用计算！" << endl;
                 pauseScreen();
@@ -225,7 +236,7 @@ int main() {
             cin >> phone;
             clearScreen();
             Charge::queryFee(phone, "fy.dat", users);
-        } else if (op == 3) {
+        } else if (op == 3) { // 话单查询
             cout << "请输入电话号码: ";
             string phone;
             cin >> phone;

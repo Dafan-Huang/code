@@ -20,14 +20,20 @@ char getGrade(double score) {
 }
 
 // 学生类
+// 学生基类，包含学号信息
 class Student {
 protected:
-    string id;
+    string id; // 学号
 public:
+    // 默认构造函数
     Student() : id("") {}
+    // 带参构造函数
     Student(const string& id_) : id(id_) {}
+    // 获取学号
     string getId() const { return id; }
+    // 设置学号
     void setId(const string& id_) { id = id_; }
+    // 虚析构函数，便于继承
     virtual ~Student() {}
 };
 
