@@ -89,7 +89,7 @@ async def send_mail(graph: Graph):
 
         await graph.send_mail('Testing Microsoft Graph', 'Hello world!', user_email or '')
         print('Mail sent.\n')
-
+        
 async def make_graph_call(graph: Graph):
     await graph.make_graph_call()
 
