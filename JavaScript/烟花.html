@@ -5,7 +5,22 @@ This HTML code represents a New Year fireworks animation. It includes various me
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <title>2024新年快乐！万事如意！</title>  <!-- 2024新年快乐！万事如意！ -->
+  <title>2025新年快乐！万事如意！</title>
+  <script>
+    // 实时同步时间显示在标题栏
+    function updateTitleWithTime() {
+      var now = new Date();
+      var timeStr = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0') + ' ' +
+        String(now.getHours()).padStart(2, '0') + ':' +
+        String(now.getMinutes()).padStart(2, '0') + ':' +
+        String(now.getSeconds()).padStart(2, '0');
+      document.title = '2025新年快乐!万事如意!' + timeStr;
+    }
+    updateTitleWithTime();
+    setInterval(updateTitleWithTime, 1000);
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"> 
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes"> 
