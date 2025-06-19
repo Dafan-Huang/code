@@ -14,9 +14,7 @@
 #include <cstdlib>
 #endif
 
-/**
- * @brief 显示主菜单，提示用户选择操作。
- */
+//  显示主菜单，提示用户选择操作。
 void showMenu() {
     std::cout << "\n--- 文本编辑器 ---\n";
     std::cout << "1. 编辑文本\n";
@@ -27,9 +25,7 @@ void showMenu() {
     std::cout << "请选择操作: ";
 }
 
-/**
- * @brief 清屏函数，根据操作系统调用不同的清屏命令。
- */
+// 清屏函数，根据操作系统调用不同的清屏命令。
 void clearScreen() {
 #ifdef _WIN32
     system("cls"); // Windows下清屏
@@ -38,10 +34,8 @@ void clearScreen() {
 #endif
 }
 
-/**
- * @brief 编辑文本内容，用户输入新内容，输入END结束。
- * @param text 引用，存储当前文本内容，将被新内容覆盖。
- */
+//  编辑文本内容，用户输入新内容，输入END结束。
+//  text 引用，存储当前文本内容，将被新内容覆盖。
 void editText(std::string &text) {
     std::cout << "当前文本内容如下：\n";
     std::cout << text;
@@ -55,10 +49,8 @@ void editText(std::string &text) {
     text = newText; // 用新内容覆盖原内容
 }
 
-/**
- * @brief 将当前文本内容保存到指定文件。
- * @param text 当前文本内容。
- */
+//  将当前文本内容保存到指定文件。
+//  text 当前文本内容。
 void saveToFile(const std::string &text) {
     std::string filename;
     std::cout << "请输入要保存的文件路径: ";
@@ -73,10 +65,9 @@ void saveToFile(const std::string &text) {
     }
 }
 
-/**
- * @brief 从指定文件读取文本内容，覆盖当前内容。
- * @param text 引用，存储读取到的文本内容。
- */
+// 从指定文件读取文本内容，覆盖当前内容。
+// text 引用，存储读取到的文本内容。
+
 void openFromFile(std::string &text) {
     std::string filename;
     std::cout << "请输入要打开的文件路径: ";
@@ -95,17 +86,16 @@ void openFromFile(std::string &text) {
     }
 }
 
-/**
- * @brief 显示当前文本内容。
- * @param text 当前文本内容。
- */
+
+// 显示当前文本内容。
+// text 当前文本内容。
 void showText(const std::string &text) {
     std::cout << "\n--- 当前文本 ---\n";
     std::cout << text << "\n";
 }
 
 /**
- * @brief 程序主函数，提供一个基于菜单的文本编辑器界面。
+ * 程序主函数，提供一个基于菜单的文本编辑器界面。
  *
  * 主循环中显示菜单，等待用户输入操作选项，根据用户选择调用相应的功能函数：
  * - 1: 编辑文本（editText）
@@ -117,7 +107,7 @@ void showText(const std::string &text) {
  * 输入非数字或无效选项时会提示用户重新输入。
  * 每次操作后会清屏（clearScreen），除非是显示文本内容。
  *
- * @return int 程序退出状态码（正常退出返回0）
+ * int 程序退出状态码（正常退出返回0）
  */
 int main() {
     std::string text; // 存储当前文本内容
