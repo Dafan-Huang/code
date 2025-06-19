@@ -1,0 +1,98 @@
+[
+  {
+    "title": "红楼梦",
+    "author": "曹雪芹",
+    "isbn": "99999",
+    "count": 9,
+    "category": "文学",
+    "publisher": "中文出版社"
+  },
+  {
+    "title": "西游记",
+    "author": "吴承恩",
+    "isbn": "99998",
+    "count": 8,
+    "category": "文学",
+    "publisher": "文学出版社"
+  },
+  {
+    "title": "水浒传",
+    "author": "施耐庵",
+    "isbn": "99997",
+    "count": 7,
+    "category": "文学",
+    "publisher": "北宋出版社"
+  },
+  {
+    "title": "三国演义",
+    "author": "罗贯中",
+    "isbn": "99996",
+    "count": 6,
+    "category": "文学",
+    "publisher": "东汉出版社"
+  },
+  {
+    "title": "红楼梦",
+    "author": "曹雪芹",
+    "isbn": "9787020002207",
+    "count": 5,
+    "category": "古典小说",
+    "publisher": "人民文学出版社"
+  },
+  {
+    "title": "西游记",
+    "author": "吴承恩",
+    "isbn": "9787020002208",
+    "count": 5,
+    "category": "古典小说",
+    "publisher": "人民文学出版社"
+  },
+  {
+    "title": "三国演义",
+    "author": "罗贯中",
+    "isbn": "9787020002209",
+    "count": 5,
+    "category": "古典小说",
+    "publisher": "人民文学出版社"
+  },
+  {
+    "title": "水浒传",
+    "author": "施耐庵",
+    "isbn": "9787020002210",
+    "count": 5,
+    "category": "古典小说",
+    "publisher": "人民文学出版社"
+  },
+  {
+    "title": "哈利·波特与魔法石",
+    "author": "J.K.罗琳",
+    "isbn": "9780747532699",
+    "count": 10,
+    "category": "奇幻小说",
+    "publisher": "人民文学出版社"
+  },
+  {
+    "title": "百年孤独",
+    "author": "加西亚·马尔克斯",
+    "isbn": "9787544291175",
+    "count": 8,
+    "category": "魔幻现实主义",
+    "publisher": "南海出版公司"
+  },
+  {
+    "title": "追风筝的人",
+    "author": "卡勒德·胡赛尼",
+    "isbn": "9787208061644",
+    "count": 7,
+    "category": "现代小说",
+    "publisher": "上海人民出版社"
+  },
+  {
+    "title": "活着",
+    "author": "余华",
+    "isbn": "9787506365437",
+    "count": 6,
+    "category": "现代小说",
+    "publisher": "作家出版社"
+  }
+]

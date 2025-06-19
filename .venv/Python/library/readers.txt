@@ -1,0 +1,10 @@
+{
+  "reader": {
+    "password": "reader123",
+    "role": "读者"
+  },
+  "黄帆": {
+    "password": "reader123",
+    "role": "读者"
+  }
+}

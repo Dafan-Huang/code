@@ -4,6 +4,7 @@ import json
 import os
 import csv
 import datetime
+from PIL import Image, ImageTk  # 需安装 pillow 库
 
 BOOKS_FILE = "books.txt"
 READERS_FILE = "readers.txt"
@@ -156,10 +157,21 @@ class LibraryManager:
         self.role = role
         self.username = username
         self.reader_manager = reader_manager
-        self.root.title("图书馆管理系统")
         self.books = load_json(BOOKS_FILE, [])
         self.borrowed_books = set()
         self.history = BorrowHistory()
+
+        # 管理员界面添加背景图
+        if self.role == "管理员":
+            try:
+                self.bg_image = Image.open("admin_bg.png")
+                self.bg_photo = ImageTk.PhotoImage(self.bg_image)
+                self.bg_label = tk.Label(self.root, image=self.bg_photo)
+                self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+            except Exception as e:
+                print("背景图加载失败：", e)
+
+        self.root.title("图书馆管理系统")
         self.create_widgets()
         self.refresh_books()
         self.set_role_permissions()
@@ -169,13 +181,14 @@ class LibraryManager:
 
     def create_widgets(self):
         # 图书列表
-        self.tree = ttk.Treeview(self.root, columns=('书名', '作者', 'ISBN'), show='headings', height=15)
-        for col in ('书名', '作者', 'ISBN'):
+        columns = ('书名', '作者', 'ISBN', '库存数量', '类别', '出版社')
+        self.tree = ttk.Treeview(self.root, columns=columns, show='headings', height=15)
+        for col in columns:
             self.tree.heading(col, text=col)
-            self.tree.column(col, width=150, anchor='center')
+            self.tree.column(col, width=120, anchor='center')
         self.tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # 操作按钮
+        # 操作按钮（第一行）
         self.btn_frame = tk.Frame(self.root, bg='#f0f0f0')
         self.btn_frame.pack(pady=5, fill=tk.X)
         self.button_widgets = []
@@ -187,29 +200,30 @@ class LibraryManager:
             ("显示全部", self.refresh_books)
         ]
         for text, cmd in self.btns:
-            btn = tk.Button(self.btn_frame, text=text, command=cmd, width=10)
-            btn.pack(side=tk.LEFT, padx=5)
+            btn = tk.Button(self.btn_frame, text=text, command=cmd, width=12)
+            btn.pack(side=tk.LEFT, padx=15, pady=5, expand=True)
             self.button_widgets.append(btn)
 
+        # 角色相关按钮（第一行右侧）
         if self.role == "读者":
-            borrow_btn = tk.Button(self.btn_frame, text="借书", command=self.borrow_book, width=10)
-            borrow_btn.pack(side=tk.LEFT, padx=5)
-            return_btn = tk.Button(self.btn_frame, text="还书", command=self.return_book, width=10)
-            return_btn.pack(side=tk.LEFT, padx=5)
+            borrow_btn = tk.Button(self.btn_frame, text="借书", command=self.borrow_book, width=12)
+            borrow_btn.pack(side=tk.LEFT, padx=15, pady=5, expand=True)
+            return_btn = tk.Button(self.btn_frame, text="还书", command=self.return_book, width=12)
+            return_btn.pack(side=tk.LEFT, padx=15, pady=5, expand=True)
         elif self.role == "管理员":
-            manage_btn = tk.Button(self.btn_frame, text="读者管理", command=self.manage_readers, width=10)
-            manage_btn.pack(side=tk.LEFT, padx=5)
+            manage_btn = tk.Button(self.btn_frame, text="读者管理", command=self.manage_readers, width=12)
+            manage_btn.pack(side=tk.LEFT, padx=15, pady=5, expand=True)
 
-        # 新增功能按钮
+        # 功能按钮（第二行）
         extra_btn_frame = tk.Frame(self.root, bg='#f0f0f0')
         extra_btn_frame.pack(pady=2, fill=tk.X)
         if self.role == "读者":
-            tk.Button(extra_btn_frame, text="修改密码", command=lambda: change_password(self.reader_manager, self.username, self.root), width=10).pack(side=tk.LEFT, padx=5)
-            tk.Button(extra_btn_frame, text="借阅历史", command=self.show_my_history, width=10).pack(side=tk.LEFT, padx=5)
+            tk.Button(extra_btn_frame, text="修改密码", command=lambda: change_password(self.reader_manager, self.username, self.root), width=12).pack(side=tk.LEFT, padx=15, pady=5, expand=True)
+            tk.Button(extra_btn_frame, text="借阅历史", command=self.show_my_history, width=12).pack(side=tk.LEFT, padx=15, pady=5, expand=True)
         if self.role == "管理员":
-            tk.Button(extra_btn_frame, text="导出图书", command=lambda: export_books(self.books), width=10).pack(side=tk.LEFT, padx=5)
-            tk.Button(extra_btn_frame, text="导入图书", command=self.import_books_dialog, width=10).pack(side=tk.LEFT, padx=5)
-            tk.Button(extra_btn_frame, text="查看借阅情况", command=lambda: show_all_borrowed(self.history, self.root), width=12).pack(side=tk.LEFT, padx=5)
+            tk.Button(extra_btn_frame, text="导出图书", command=lambda: export_books(self.books), width=12).pack(side=tk.LEFT, padx=15, pady=5, expand=True)
+            tk.Button(extra_btn_frame, text="导入图书", command=self.import_books_dialog, width=12).pack(side=tk.LEFT, padx=15, pady=5, expand=True)
+            tk.Button(extra_btn_frame, text="查看借阅情况", command=lambda: show_all_borrowed(self.history, self.root), width=14).pack(side=tk.LEFT, padx=15, pady=5, expand=True)
 
     def set_role_permissions(self):
         if self.role == "读者":
@@ -240,7 +254,17 @@ class LibraryManager:
             if isinstance(book, dict) and 'title' in book and 'author' in book and 'isbn' in book
         ]
         for book in valid_books:
-            self.tree.insert('', tk.END, values=(book['title'], book['author'], book['isbn']))
+            self.tree.insert(
+                '', tk.END,
+                values=(
+                    book.get('title', ''),
+                    book.get('author', ''),
+                    book.get('isbn', ''),
+                    book.get('count', ''),
+                    book.get('category', ''),
+                    book.get('publisher', '')
+                )
+            )
 
     def add_book(self):
         book = self.get_book_info()
