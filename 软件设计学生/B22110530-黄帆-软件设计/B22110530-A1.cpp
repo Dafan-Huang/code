@@ -41,7 +41,7 @@ int main() {
     // 输出排序后的学生信息
     cout << "\n按分数降序排列结果:\n";
     for (const auto &stu : students) {
-        cout << stu.name << " " << stu.score << endl;
+        cout << stu.name << " " << stu.score << endl;        
     }
 
     return 0; // 程序正常结束
