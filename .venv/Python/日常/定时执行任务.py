@@ -132,7 +132,6 @@ def start_schedule():
         return
     task_name, interval, repeat = params
     schedule_selected_task(task_name, interval, repeat)
-    schedule_task(interval, task, repeat)
 
 process_log()
 root.mainloop()
