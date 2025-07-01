@@ -12,6 +12,8 @@ class TaskSchedulerApp:
         self.master.title("定时任务工具")
         self.log_queue = queue.Queue()
         self.shutdown_scheduled = False
+        self.running = False
+        self.task_thread = None
 
         self.TASKS = {
             "打印任务": self.my_task,
@@ -24,24 +26,53 @@ class TaskSchedulerApp:
         self.process_log()
 
     def create_widgets(self):
-        tk.Label(self.master, text="选择任务:").grid(row=0, column=0, padx=10, pady=10)
-        self.task_var = tk.StringVar()
-        self.task_combo = ttk.Combobox(self.master, textvariable=self.task_var, values=list(self.TASKS.keys()), state="readonly")
-        self.task_combo.grid(row=0, column=1, padx=10, pady=10)
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure('TButton', font=('微软雅黑', 10))
+        style.configure('TLabel', font=('微软雅黑', 10))
+        style.configure('TCheckbutton', font=('微软雅黑', 10))
+        style.configure('TCombobox', font=('微软雅黑', 10))
 
-        tk.Label(self.master, text="间隔(秒):").grid(row=1, column=0, padx=10, pady=10)
+        frm = ttk.Frame(self.master, padding=15)
+        frm.grid(row=0, column=0, sticky="nsew")
+        self.master.rowconfigure(0, weight=1)
+        self.master.columnconfigure(0, weight=1)
+
+        ttk.Label(frm, text="选择任务:").grid(row=0, column=0, padx=5, pady=5, sticky='e')
+        self.task_var = tk.StringVar()
+        self.task_combo = ttk.Combobox(frm, textvariable=self.task_var, values=list(self.TASKS.keys()), state="readonly", width=18)
+        self.task_combo.grid(row=0, column=1, padx=5, pady=5, sticky='w')
+        self.task_combo.current(0)
+
+        ttk.Label(frm, text="间隔(秒):").grid(row=1, column=0, padx=5, pady=5, sticky='e')
         self.interval_var = tk.StringVar(value="10")
-        tk.Entry(self.master, textvariable=self.interval_var).grid(row=1, column=1, padx=10, pady=10)
+        ttk.Entry(frm, textvariable=self.interval_var, width=20).grid(row=1, column=1, padx=5, pady=5, sticky='w')
 
         self.repeat_var = tk.BooleanVar(value=True)
-        tk.Checkbutton(self.master, text="循环执行", variable=self.repeat_var).grid(row=2, column=0, columnspan=2, pady=5)
+        ttk.Checkbutton(frm, text="循环执行", variable=self.repeat_var).grid(row=2, column=0, columnspan=2, pady=5, sticky='w')
 
-        self.start_btn = tk.Button(self.master, text="启动任务", command=self.start_schedule)
-        self.start_btn.grid(row=3, column=0, columnspan=2, pady=10)
+        btnfrm = ttk.Frame(frm)
+        btnfrm.grid(row=3, column=0, columnspan=2, pady=10)
+        self.start_btn = ttk.Button(btnfrm, text="启动任务", command=self.start_schedule)
+        self.start_btn.pack(side='left', padx=5)
+        self.stop_btn = ttk.Button(btnfrm, text="停止任务", command=self.stop_task, state='disabled')
+        self.stop_btn.pack(side='left', padx=5)
 
-        tk.Label(self.master, text="任务日志:").grid(row=4, column=0, columnspan=2)
-        self.log_text = tk.Text(self.master, height=10, width=40, state='disabled')
-        self.log_text.grid(row=5, column=0, columnspan=2, padx=10, pady=5)
+        ttk.Label(frm, text="任务状态:").grid(row=4, column=0, sticky='e')
+        self.status_var = tk.StringVar(value="未启动")
+        ttk.Label(frm, textvariable=self.status_var, foreground='blue').grid(row=4, column=1, sticky='w')
+
+        ttk.Label(frm, text="任务日志:").grid(row=5, column=0, columnspan=2, sticky='w')
+        logfrm = ttk.Frame(frm)
+        logfrm.grid(row=6, column=0, columnspan=2, sticky='nsew')
+        self.log_text = tk.Text(logfrm, height=10, width=48, state='disabled', font=('Consolas', 10))
+        self.log_text.pack(side='left', fill='both', expand=True)
+        scrollbar = ttk.Scrollbar(logfrm, command=self.log_text.yview)
+        scrollbar.pack(side='right', fill='y')
+        self.log_text['yscrollcommand'] = scrollbar.set
+
+        frm.rowconfigure(6, weight=1)
+        frm.columnconfigure(1, weight=1)
 
     def log(self, msg):
         self.log_queue.put(msg)
@@ -60,10 +91,26 @@ class TaskSchedulerApp:
         self.master.after(100, self.process_log)
 
     def start_schedule(self):
+        if self.running:
+            self.log("已有任务在运行，请先停止。")
+            return
         task_name, interval, repeat = self.validate_params()
         if task_name is None:
             return
-        self.schedule_selected_task(task_name, interval, repeat)
+        self.running = True
+        self.status_var.set("运行中")
+        self.start_btn.config(state='disabled')
+        self.stop_btn.config(state='normal')
+        self.task_thread = threading.Thread(target=self.schedule_selected_task, args=(task_name, interval, repeat), daemon=True)
+        self.task_thread.start()
+
+    def stop_task(self):
+        if self.running:
+            self.running = False
+            self.status_var.set("已停止")
+            self.start_btn.config(state='normal')
+            self.stop_btn.config(state='disabled')
+            self.log("任务已请求停止。")
 
     def validate_params(self):
         task_name = self.task_var.get()
@@ -79,27 +126,31 @@ class TaskSchedulerApp:
             self.log("请输入有效的数字作为间隔。")
             return None, None, None
         repeat = self.repeat_var.get()
-        # 定时关机任务只执行一次
         if task_name == "定时关机":
             repeat = False
         return task_name, interval, repeat
 
     def schedule_task(self, interval, task, repeat=True):
-        def wrapper():
-            if repeat:
-                while True:
-                    try:
-                        task()
-                    except Exception as e:
-                        self.log(f"任务执行异常: {e}")
-                    time.sleep(interval)
-            else:
+        if repeat:
+            while self.running:
                 try:
                     task()
                 except Exception as e:
                     self.log(f"任务执行异常: {e}")
-        t = threading.Thread(target=wrapper, daemon=True)
-        t.start()
+                for _ in range(interval):
+                    if not self.running:
+                        break
+                    time.sleep(1)
+        else:
+            if self.running:
+                try:
+                    task()
+                except Exception as e:
+                    self.log(f"任务执行异常: {e}")
+            self.running = False
+            self.status_var.set("已停止")
+            self.start_btn.config(state='normal')
+            self.stop_btn.config(state='disabled')
 
     def schedule_selected_task(self, task_name, interval, repeat):
         task = self.TASKS[task_name]
