@@ -1,3 +1,8 @@
+"""
+彩虹说话机
+一个使用Tkinter和pyttsx3实现的彩色界面语音播报应用。
+"""
+
 import tkinter as tk
 import pyttsx3
 import itertools
@@ -22,35 +27,22 @@ class RainbowSpeakerApp:
         self.root = root
         self.engine = pyttsx3.init()
         self.color_cycle = itertools.cycle(self.COLORS)
-        self.bg_job = None
-        self.changing_bg = False
         self.speaking_names = False
+        self.name_job = None
 
         self.setup_ui()
         self.center_window()
-        self.start_bg_change()
+        self.change_bg()
 
     def speak(self, text):
         self.engine.say(text)
         self.engine.runAndWait()
 
     def change_bg(self):
-        if self.changing_bg:
-            color = next(self.color_cycle)
-            self.root.configure(bg=color)
-            self.label.configure(bg=color)
-            self.main_frame.configure(bg=color)
-            self.bg_job = self.root.after(200, self.change_bg)
-
-    def start_bg_change(self):
-        self.changing_bg = True
-        self.change_bg()
-
-    def stop_bg_change(self):
-        self.changing_bg = False
-        if self.bg_job:
-            self.root.after_cancel(self.bg_job)
-            self.bg_job = None
+        color = next(self.color_cycle)
+        self.root.configure(bg=color)
+        self.main_frame.configure(bg=color)
+        self.root.after(200, self.change_bg)
 
     def random_label_text(self):
         new_text = random.choice(self.TEXTS)
@@ -61,28 +53,32 @@ class RainbowSpeakerApp:
         if self.speaking_names:
             name = random.choice(self.NAMES)
             self.speak(f"{name}，回头")
-            self.root.after(1500, self.speak_random_name)
+            self.name_job = self.root.after(1500, self.speak_random_name)
 
     def toggle_speak_names(self):
         self.speaking_names = not self.speaking_names
+        self.toggle_button.config(
+            text="停止名字播报" if self.speaking_names else "开始名字播报"
+        )
         if self.speaking_names:
             self.speak_random_name()
-            self.toggle_button.config(text="停止名字播报")
-        else:
-            self.toggle_button.config(text="开始名字播报")
+        elif self.name_job:
+            self.root.after_cancel(self.name_job)
+            self.name_job = None
 
     def on_enter(self, e):
+        e.widget._original_bg = e.widget.cget("bg")
         e.widget.config(bg="#f5f5f5")
 
     def on_leave(self, e):
-        e.widget.config(bg="#fff")
+        e.widget.config(bg=getattr(e.widget, "_original_bg", "#fff"))
 
     def setup_ui(self):
         self.root.title("彩虹说话机")
         self.root.geometry("420x280")
         self.root.resizable(False, False)
 
-        self.main_frame = tk.Frame(self.root, bg=self.COLORS[0], bd=0)
+        self.main_frame = tk.Frame(self.root, bg=self.COLORS[0])
         self.main_frame.pack(expand=True, fill="both")
 
         self.label = tk.Label(
@@ -106,13 +102,13 @@ class RainbowSpeakerApp:
             "height": 1
         }
 
-        button = tk.Button(self.main_frame, text="随机文本", command=self.random_label_text, **button_style)
-        button.pack(pady=8)
+        btn_random = tk.Button(self.main_frame, text="随机文本", command=self.random_label_text, **button_style)
+        btn_random.pack(pady=8)
 
         self.toggle_button = tk.Button(self.main_frame, text="开始名字播报", command=self.toggle_speak_names, **button_style)
         self.toggle_button.pack(pady=8)
 
-        for btn in [button, self.toggle_button]:
+        for btn in [btn_random, self.toggle_button]:
             btn.bind("<Enter>", self.on_enter)
             btn.bind("<Leave>", self.on_leave)
 
