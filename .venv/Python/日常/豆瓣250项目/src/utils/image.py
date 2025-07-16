@@ -10,7 +10,7 @@ import io
 import threading
 from typing import Optional, Callable, Dict
 from PIL import Image, ImageTk
-from ..core.config import TIMEOUT, POSTER_CONFIG
+from src.core.config import TIMEOUT, POSTER_CONFIG
 
 
 class ImageCache:

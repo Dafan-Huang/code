@@ -10,7 +10,7 @@ import time
 import re
 from bs4 import BeautifulSoup
 from typing import List, Dict, Optional
-from .config import HEADERS, REQUEST_DELAY, TIMEOUT
+from src.core.config import HEADERS, REQUEST_DELAY, TIMEOUT
 
 
 class DoubanDataFetcher:
@@ -38,7 +38,7 @@ class DoubanDataFetcher:
             
             # 如果网络获取失败，返回备用数据
             if not movies:
-                from .config import BACKUP_MOVIES
+                from src.core.config import BACKUP_MOVIES
                 movies = self._convert_backup_data(BACKUP_MOVIES)
             
             # 缓存数据

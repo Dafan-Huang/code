@@ -8,7 +8,7 @@
 import requests
 import time
 from typing import Dict, List, Optional
-from .config import HEADERS, TIMEOUT, RETRY_DELAY, MAX_RETRIES
+from src.core.config import HEADERS, TIMEOUT, RETRY_DELAY, MAX_RETRIES
 
 
 class NetworkTester:

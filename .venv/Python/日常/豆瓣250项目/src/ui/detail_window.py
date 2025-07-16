@@ -10,8 +10,8 @@ from tkinter import ttk, messagebox
 import webbrowser
 from typing import Dict, Optional
 
-from ..core.config import WINDOW_CONFIG, COLORS
-from ..utils.helpers import logger, create_tooltip
+from src.core.config import WINDOW_CONFIG, COLORS
+from src.utils.helpers import logger, create_tooltip
 
 
 class MovieDetailWindow:

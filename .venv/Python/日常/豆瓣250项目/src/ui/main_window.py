@@ -10,12 +10,12 @@ from tkinter import ttk, messagebox
 import threading
 from typing import List, Dict, Optional, Any
 
-from ..core.data_fetcher import DoubanDataFetcher
-from ..core.network import NetworkTester
-from ..core.config import WINDOW_CONFIG, STYLES, COLORS
-from ..utils.image import PosterManager
-from ..utils.helpers import logger, performance_monitor, create_tooltip
-from .detail_window import MovieDetailWindow
+from src.core.data_fetcher import DoubanDataFetcher
+from src.core.network import NetworkTester
+from src.core.config import WINDOW_CONFIG, STYLES, COLORS
+from src.utils.image import PosterManager
+from src.utils.helpers import logger, performance_monitor, create_tooltip
+from src.ui.detail_window import MovieDetailWindow
 
 
 class MainWindow:
