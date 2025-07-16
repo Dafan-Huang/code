@@ -17,168 +17,55 @@ def fetch_douban_top250():
         list[dict]: 每部电影为一个字典，包含详细信息。
     """
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Cache-Control': 'max-age=0'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
-    
     movies = []
-    session = requests.Session()
-    session.headers.update(headers)
-    
     for start in range(0, 250, 25):
         url = f'https://movie.douban.com/top250?start={start}'
         try:
-            print(f"正在获取第{start//25 + 1}页数据...")
-            
-            # 添加延迟避免请求过快
-            import time
-            time.sleep(1)
-            
-            resp = session.get(url, timeout=15)
+            resp = requests.get(url, headers=headers, timeout=10)
             resp.raise_for_status()
-            
-            # 检查响应内容
-            if not resp.text or len(resp.text) < 1000:
-                print(f"第{start}页响应内容异常，跳过")
-                continue
-            
             soup = BeautifulSoup(resp.text, 'html.parser')
-            
-            # 检查是否成功解析
-            if not soup:
-                print(f"第{start}页BeautifulSoup解析失败，跳过")
-                continue
-            
-            # 查找电影列表
             items = soup.find_all('div', class_='item')
             
-            if not items:
-                print(f"第{start}页未找到电影项目，尝试其他选择器...")
-                # 尝试更宽泛的选择器
-                items = soup.find_all('li')
-                if not items:
-                    print(f"第{start}页完全没有找到电影数据")
-                    continue
-            
-            print(f"第{start}页找到 {len(items)} 个电影项目")
-            
             for item in items:
-                try:
-                    title_tag = item.find('span', class_='title')
-                    rating_tag = item.find('span', class_='rating_num')
-                    img_tag = item.find('img')
-                    
-                    # 获取电影详情页链接
-                    detail_link = item.find('a')
-                    detail_url = detail_link['href'] if detail_link else ''
-                    
-                    # 获取电影基本信息
-                    info_tag = item.find('p', class_='')
-                    info = info_tag.text.strip() if info_tag else ''
-                    
-                    # 获取电影简介/评语
-                    quote_tag = item.find('span', class_='inq')
-                    quote = quote_tag.text.strip() if quote_tag else ''
-                    
-                    # 获取评分人数
-                    rating_people = ''
-                    star_div = item.find('div', class_='star')
-                    if star_div:
-                        rating_people_tags = star_div.find_all('span')
-                        if len(rating_people_tags) > 3:
-                            rating_people = rating_people_tags[3].text.strip()
-                    
-                    if title_tag and rating_tag and img_tag:
-                        title = title_tag.text.strip()
-                        rating = rating_tag.text.strip()
-                        img_url = img_tag['src'] if img_tag.get('src') else ''
-                        
-                        movies.append({
-                            'title': title, 
-                            'rating': rating, 
-                            'img_url': img_url,
-                            'detail_url': detail_url,
-                            'info': info,
-                            'quote': quote,
-                            'rating_people': rating_people
-                        })
-                        
-                except Exception as item_error:
-                    print(f"解析单个电影项目失败: {item_error}")
-                    continue
-                    
-        except requests.exceptions.RequestException as e:
-            print(f"获取第{start}页网络请求失败: {e}")
-            continue
+                title_tag = item.find('span', class_='title')
+                rating_tag = item.find('span', class_='rating_num')
+                img_tag = item.find('img')
+                
+                # 获取电影详情页链接
+                detail_link = item.find('a')
+                detail_url = detail_link['href'] if detail_link else ''
+                
+                # 获取电影基本信息
+                info_tag = item.find('p', class_='')
+                info = info_tag.text.strip() if info_tag else ''
+                
+                # 获取电影简介/评语
+                quote_tag = item.find('span', class_='inq')
+                quote = quote_tag.text.strip() if quote_tag else ''
+                
+                # 获取评分人数
+                rating_people_tag = item.find('div', class_='star').find_all('span')
+                rating_people = rating_people_tag[3].text if len(rating_people_tag) > 3 else ''
+                
+                if title_tag and rating_tag and img_tag:
+                    title = title_tag.text.strip()
+                    rating = rating_tag.text.strip()
+                    img_url = img_tag['src']
+                    movies.append({
+                        'title': title, 
+                        'rating': rating, 
+                        'img_url': img_url,
+                        'detail_url': detail_url,
+                        'info': info,
+                        'quote': quote,
+                        'rating_people': rating_people
+                    })
         except Exception as e:
             print(f"获取第{start}页数据失败: {e}")
             continue
-    
-    print(f"总共获取到 {len(movies)} 部电影")
     return movies
-
-def fetch_douban_top250_backup():
-    """
-    备用的豆瓣Top250获取函数，使用更简单的方式
-    """
-    # 如果网络获取失败，使用一些示例数据
-    sample_movies = [
-        {
-            'title': '肖申克的救赎',
-            'rating': '9.7',
-            'img_url': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p480747492.jpg',
-            'detail_url': 'https://movie.douban.com/subject/1292052/',
-            'info': '导演: 弗兰克·德拉邦特 主演: 蒂姆·罗宾斯 / 摩根·弗里曼',
-            'quote': '希望让人自由。',
-            'rating_people': '2800000人评价'
-        },
-        {
-            'title': '霸王别姬',
-            'rating': '9.6',
-            'img_url': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p1910813120.jpg',
-            'detail_url': 'https://movie.douban.com/subject/1291546/',
-            'info': '导演: 陈凯歌 主演: 张国荣 / 张丰毅 / 巩俐',
-            'quote': '风华绝代。',
-            'rating_people': '1800000人评价'
-        },
-        {
-            'title': '阿甘正传',
-            'rating': '9.5',
-            'img_url': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p510876377.jpg',
-            'detail_url': 'https://movie.douban.com/subject/1292720/',
-            'info': '导演: 罗伯特·泽米吉斯 主演: 汤姆·汉克斯 / 罗宾·怀特',
-            'quote': '一部美国近现代史。',
-            'rating_people': '1900000人评价'
-        },
-        {
-            'title': '泰坦尼克号',
-            'rating': '9.4',
-            'img_url': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p457760035.jpg',
-            'detail_url': 'https://movie.douban.com/subject/1292722/',
-            'info': '导演: 詹姆斯·卡梅隆 主演: 莱昂纳多·迪卡普里奥 / 凯特·温丝莱特',
-            'quote': '失去的才是永恒的。',
-            'rating_people': '1600000人评价'
-        },
-        {
-            'title': '这个杀手不太冷',
-            'rating': '9.4',
-            'img_url': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p511118051.jpg',
-            'detail_url': 'https://movie.douban.com/subject/1295644/',
-            'info': '导演: 吕克·贝松 主演: 让·雷诺 / 娜塔莉·波特曼',
-            'quote': '完美的杀手。',
-            'rating_people': '1700000人评价'
-        }
-    ]
-    
-    return sample_movies
 
 class MovieDetailWindow:
     def __init__(self, parent, movie_data):
@@ -535,20 +422,17 @@ class DoubanApp:
         self.btn_fetch = ttk.Button(btn_frame, text="获取豆瓣Top250", command=self.show_movies)
         self.btn_fetch.grid(row=0, column=0, padx=5)
 
-        self.btn_test = ttk.Button(btn_frame, text="测试网络", command=self.test_network)
-        self.btn_test.grid(row=0, column=1, padx=5)
-
         self.btn_prev = ttk.Button(btn_frame, text="上一页", command=self.prev_page, state='disabled')
-        self.btn_prev.grid(row=0, column=2, padx=5)
+        self.btn_prev.grid(row=0, column=1, padx=5)
 
         self.page_label = ttk.Label(btn_frame, text="第 0 / 0 页", font=('微软雅黑', 12))
-        self.page_label.grid(row=0, column=3, padx=5)
+        self.page_label.grid(row=0, column=2, padx=5)
 
         self.btn_next = ttk.Button(btn_frame, text="下一页", command=self.next_page, state='disabled')
-        self.btn_next.grid(row=0, column=4, padx=5)
+        self.btn_next.grid(row=0, column=3, padx=5)
 
         self.btn_filter = ttk.Button(btn_frame, text="只看已看过", command=self.toggle_filter)
-        self.btn_filter.grid(row=0, column=5, padx=5)
+        self.btn_filter.grid(row=0, column=4, padx=5)
 
         self.tree.bind('<Motion>', self.on_tree_motion)
         self.tree.bind('<Leave>', self.on_tree_leave)
@@ -573,47 +457,16 @@ class DoubanApp:
             self.btn_next.config(state='disabled')
             self.tree.delete(*self.tree.get_children())
             self.page_label.config(text="加载中...")
-            
             try:
-                # 首先尝试获取真实数据
                 self.movies = fetch_douban_top250()
-                
-                # 如果获取的数据太少，尝试使用备用数据
-                if len(self.movies) < 10:
-                    print("获取的数据太少，使用备用数据...")
-                    backup_movies = fetch_douban_top250_backup()
-                    if backup_movies:
-                        self.movies.extend(backup_movies)
-                        messagebox.showinfo("提示", 
-                                          f"网络数据获取不完整，已加载 {len(self.movies)} 部电影\n"
-                                          "包含部分示例数据，仅供演示使用")
-                
-                if not self.movies:
-                    # 如果完全没有数据，只使用备用数据
-                    self.movies = fetch_douban_top250_backup()
-                    messagebox.showwarning("网络问题", 
-                                         "无法获取豆瓣数据，显示示例数据\n"
-                                         "请检查网络连接或稍后重试")
-                
                 self.seen_dict = {m['img_url']: False for m in self.movies}
                 self.current_page = 0
                 self.update_page()
-                
             except Exception as e:
-                print(f"获取数据异常: {e}")
-                # 发生异常时使用备用数据
-                try:
-                    self.movies = fetch_douban_top250_backup()
-                    self.seen_dict = {m['img_url']: False for m in self.movies}
-                    self.current_page = 0
-                    self.update_page()
-                    messagebox.showerror("错误", f"数据获取失败: {e}\n已加载示例数据")
-                except Exception as backup_error:
-                    messagebox.showerror("严重错误", f"程序无法正常运行: {backup_error}")
-                    self.page_label.config(text="第 0 / 0 页")
+                messagebox.showerror("错误", f"获取数据失败: {e}")
+                self.page_label.config(text="第 0 / 0 页")
             finally:
                 self.btn_fetch.config(state='normal')
-                
         threading.Thread(target=task, daemon=True).start()
 
     def get_display_movies(self):
@@ -828,57 +681,6 @@ class DoubanApp:
             
             self.window_width = new_width
             self.window_height = new_height
-
-    def test_network(self):
-        """测试网络连接"""
-        def task():
-            self.btn_test.config(state='disabled')
-            self.btn_fetch.config(state='disabled')
-            
-            try:
-                if test_network_connection():
-                    messagebox.showinfo("网络测试", "✅ 网络连接正常\n可以尝试获取豆瓣数据")
-                else:
-                    messagebox.showwarning("网络测试", "❌ 网络连接异常\n请检查网络设置或稍后重试")
-            except Exception as e:
-                messagebox.showerror("测试错误", f"网络测试失败: {e}")
-            finally:
-                self.btn_test.config(state='normal')
-                self.btn_fetch.config(state='normal')
-                
-        threading.Thread(target=task, daemon=True).start()
-
-def test_network_connection():
-    """
-    测试网络连接和豆瓣访问
-    """
-    try:
-        # 测试基本网络连接
-        response = requests.get('https://www.baidu.com', timeout=5)
-        if response.status_code == 200:
-            print("✅ 基本网络连接正常")
-        else:
-            print("❌ 基本网络连接异常")
-            return False
-            
-        # 测试豆瓣访问
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-        response = requests.get('https://movie.douban.com/top250', headers=headers, timeout=10)
-        if response.status_code == 200:
-            print("✅ 豆瓣网站访问正常")
-            return True
-        else:
-            print(f"❌ 豆瓣网站访问异常，状态码: {response.status_code}")
-            return False
-            
-    except requests.exceptions.RequestException as e:
-        print(f"❌ 网络连接测试失败: {e}")
-        return False
-    except Exception as e:
-        print(f"❌ 连接测试异常: {e}")
-        return False
 
 if __name__ == '__main__':
     root = tk.Tk()
