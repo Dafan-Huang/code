@@ -55,3 +55,5 @@ origin	git@github.com:Dafan-Huang/code.git (push)
 2025-12-11 23:34:04,768 - INFO - 执行命令: list
 2025-12-11 23:34:04,768 - INFO - 当前定时任务:
 2025-12-11 23:34:06,428 - INFO - 命令执行成功: schtasks /query /fo list
+2025-12-23 10:41:01,058 - INFO - 启动手动任务执行器
+2025-12-23 10:41:01,059 - ERROR - 程序运行时发生错误: EOF when reading a line
