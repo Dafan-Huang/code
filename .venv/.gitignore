@@ -1,9 +1,0 @@
-Lib/
-
-SCripts/
-
-share/
-
-build/
-
-!.venv/Python/*.py 
