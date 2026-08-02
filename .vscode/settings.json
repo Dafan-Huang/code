@@ -68,5 +68,7 @@
             "args": []
         }
     },
-    "terminal.integrated.defaultProfile.windows": "PowerShell (pwsh)"
+    "terminal.integrated.defaultProfile.windows": "PowerShell (pwsh)",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
 }
