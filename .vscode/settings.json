@@ -63,12 +63,12 @@
     "python.testing.unittestEnabled": true,
     "cmake.sourceDirectory": "C:/Users/24096/Desktop/code/ros2_21_tutorials-master/learning_interface",
     "terminal.integrated.profiles.windows": {
-        "PowerShell (pwsh)": {
+        "PowerShell": {
             "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
             "args": []
         }
     },
-    "terminal.integrated.defaultProfile.windows": "PowerShell (pwsh)",
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda"
 }
